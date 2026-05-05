@@ -1,3 +1,31 @@
 spring:
   application:
     name: consensus
+
+  threads:
+    virtual:
+      enabled: true
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          lob:
+            non_contextual_creation: true
+    show-sql: true
+
+  jackson:
+    time-zone: UTC
+    default-property-inclusion: non_null
+
+server:
+  port: 8080
+
+logging:
+  level:
+    com.carmenio.consensus: DEBUG
+    org.hibernate.SQL: DEBUG
