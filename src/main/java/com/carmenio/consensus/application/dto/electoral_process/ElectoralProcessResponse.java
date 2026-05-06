@@ -1,5 +1,6 @@
 package com.carmenio.consensus.application.dto.electoral_process;
 
+import com.carmenio.consensus.common.constant.ProcessStatus;
 import lombok.*;
 
 import java.time.Instant;
@@ -18,6 +19,8 @@ public class ElectoralProcessResponse {
     private UUID id;
     private String name;
     private String scope;
+    private String description;
+    private ProcessStatus estatus;
     private Instant commitmentStart;
     private Instant commitmentEnd;
     private Instant votingStart;

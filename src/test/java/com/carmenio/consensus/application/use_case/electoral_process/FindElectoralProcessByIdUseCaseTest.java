@@ -17,6 +17,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,7 +49,7 @@ class FindElectoralProcessByIdUseCaseTest {
                 .build();
 
         when(repository.findById(id)).thenReturn(Optional.of(entity));
-        when(mapper.toResponse(entity)).thenReturn(ElectoralProcessResponse.builder()
+        when(mapper.toResponse(any(), any())).thenReturn(ElectoralProcessResponse.builder()
                 .id(id).name("Test Process").scope("test-scope").build());
 
         var result = useCase.execute(id);

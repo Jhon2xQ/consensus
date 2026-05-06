@@ -2,16 +2,20 @@ package com.carmenio.consensus.application.use_case.electoral_process;
 
 import com.carmenio.consensus.application.dto.electoral_process.CreateElectoralProcessRequest;
 import com.carmenio.consensus.application.dto.electoral_process.ElectoralProcessResponse;
+import com.carmenio.consensus.application.util.ProcessStateCalculator;
 import com.carmenio.consensus.domain.exception.ElectoralProcessException;
 import com.carmenio.consensus.domain.repository.ElectoralProcessRepository;
 import com.carmenio.consensus.infrastructure.mapper.ElectoralProcessMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
+
 /**
  * Use case for creating a new electoral process.
  * <p>
- * Validates uniqueness of name and scope before persisting.
+ * Validates uniqueness of name and scope before persisting,
+ * then auto-transitions the estatus via {@link ProcessStateCalculator#transitionState}.
  */
 @Component
 @RequiredArgsConstructor
@@ -37,6 +41,11 @@ public class CreateElectoralProcessUseCase {
 
         var entity = mapper.toEntity(request);
         var saved = repository.save(entity);
-        return mapper.toResponse(saved);
+
+        // Auto-transition estatus based on current dates
+        // Dirty checking persists the change on transaction commit
+        ProcessStateCalculator.transitionState(saved, Instant.now());
+
+        return mapper.toResponse(saved, saved.getEstatus());
     }
 }

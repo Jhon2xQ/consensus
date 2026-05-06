@@ -1,5 +1,6 @@
 package com.carmenio.consensus.application.use_case.record;
 
+import com.carmenio.consensus.common.constant.ProcessStatus;
 import com.carmenio.consensus.domain.entity.ElectoralProcess;
 import com.carmenio.consensus.domain.entity.Team;
 import com.carmenio.consensus.domain.entity.VoteRecord;
@@ -99,6 +100,60 @@ class GetProcessResultsUseCaseTest {
 
         assertTrue(exception.getMessage().contains("not found"));
         assertEquals(404, exception.getStatusCode());
+        verify(voteRecordRepository, never()).findByScope(any());
+    }
+
+    @Test
+    @DisplayName("Should throw 400 when process is PAUSED (lock)")
+    void shouldThrow400WhenProcessIsPaused() {
+        var now = Instant.now();
+        var process = ElectoralProcess.builder()
+                .id(UUID.randomUUID())
+                .scope("scope-123")
+                .commitmentStart(now.minusSeconds(14400))
+                .commitmentEnd(now.minusSeconds(10800))
+                .votingStart(now.minusSeconds(7200))
+                .votingEnd(now.minusSeconds(3600))
+                .results(now.minusSeconds(1))
+                .build();
+        process.setEstatus(ProcessStatus.PAUSED);
+        var processId = process.getId();
+
+        when(electoralProcessRepository.findById(processId))
+                .thenReturn(Optional.of(process));
+
+        var exception = assertThrows(ElectoralProcessException.class,
+                () -> useCase.execute(processId));
+
+        assertTrue(exception.getMessage().contains("closed"));
+        assertEquals(400, exception.getStatusCode());
+        verify(voteRecordRepository, never()).findByScope(any());
+    }
+
+    @Test
+    @DisplayName("Should throw 400 when process is CANCELLED (lock)")
+    void shouldThrow400WhenProcessIsCancelled() {
+        var now = Instant.now();
+        var process = ElectoralProcess.builder()
+                .id(UUID.randomUUID())
+                .scope("scope-123")
+                .commitmentStart(now.minusSeconds(14400))
+                .commitmentEnd(now.minusSeconds(10800))
+                .votingStart(now.minusSeconds(7200))
+                .votingEnd(now.minusSeconds(3600))
+                .results(now.minusSeconds(1))
+                .build();
+        process.setEstatus(ProcessStatus.CANCELLED);
+        var processId = process.getId();
+
+        when(electoralProcessRepository.findById(processId))
+                .thenReturn(Optional.of(process));
+
+        var exception = assertThrows(ElectoralProcessException.class,
+                () -> useCase.execute(processId));
+
+        assertTrue(exception.getMessage().contains("closed"));
+        assertEquals(400, exception.getStatusCode());
         verify(voteRecordRepository, never()).findByScope(any());
     }
 

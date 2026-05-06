@@ -1,5 +1,6 @@
 package com.carmenio.consensus.domain.entity;
 
+import com.carmenio.consensus.common.constant.ProcessStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -18,7 +19,10 @@ import java.util.UUID;
  *   <li><b>Voting</b> — voting window ({@link #votingStart} → {@link #votingEnd})</li>
  *   <li><b>Results</b> — results publication ({@link #results})</li>
  * </ol>
- * The state is <strong>calculated in real-time</strong> from these dates.
+ * The {@code estatus} is always non-null, managed by {@link
+ * com.carmenio.consensus.application.util.ProcessStateCalculator#transitionState}
+ * on write operations. PAUSED and CANCELLED are manual lock states that
+ * block auto-transition.
  */
 @Entity
 @Table(name = "electoral_processes")
@@ -39,6 +43,14 @@ public class ElectoralProcess {
 
     @Column(nullable = false, unique = true)
     private String scope;
+
+    @Column(nullable = true)
+    private String description;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private ProcessStatus estatus = ProcessStatus.NONE;
 
     @Column(nullable = false)
     private Instant commitmentStart;

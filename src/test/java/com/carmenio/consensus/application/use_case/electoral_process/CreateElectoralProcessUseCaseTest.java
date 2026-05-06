@@ -18,7 +18,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,6 +51,7 @@ class CreateElectoralProcessUseCaseTest {
                 .id(UUID.randomUUID())
                 .name("Presidential Election")
                 .scope("presidential-2026")
+                .description("Presidential election 2026")
                 .commitmentStart(now)
                 .commitmentEnd(now.plusSeconds(3600))
                 .votingStart(now.plusSeconds(7200))
@@ -62,7 +63,7 @@ class CreateElectoralProcessUseCaseTest {
         when(repository.existsByScope("presidential-2026")).thenReturn(false);
         when(mapper.toEntity(request)).thenReturn(entity);
         when(repository.save(entity)).thenReturn(entity);
-        when(mapper.toResponse(entity)).thenReturn(ElectoralProcessResponse.builder()
+        when(mapper.toResponse(any(), any())).thenReturn(ElectoralProcessResponse.builder()
                 .id(entity.getId())
                 .name("Presidential Election")
                 .scope("presidential-2026")

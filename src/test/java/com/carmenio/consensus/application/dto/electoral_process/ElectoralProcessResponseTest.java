@@ -1,4 +1,4 @@
-package com.carmenio.consensus.domain.entity;
+package com.carmenio.consensus.application.dto.electoral_process;
 
 import com.carmenio.consensus.common.constant.ProcessStatus;
 import org.junit.jupiter.api.DisplayName;
@@ -10,19 +10,19 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests for {@link ElectoralProcess} entity fields.
+ * Tests for {@link ElectoralProcessResponse} DTO.
  */
-class ElectoralProcessTest {
+class ElectoralProcessResponseTest {
 
     @Test
-    @DisplayName("should persist and retrieve description and estatus")
-    void shouldPersistAndRetrieveDescriptionAndEstatus() {
+    @DisplayName("should include description and estatus fields")
+    void shouldIncludeDescriptionAndEstatus() {
         var now = Instant.now();
-        var process = ElectoralProcess.builder()
+        var response = ElectoralProcessResponse.builder()
                 .id(UUID.randomUUID())
                 .name("Test Process")
                 .scope("test-scope")
-                .description("A test electoral process")
+                .description("A test process")
                 .estatus(ProcessStatus.PAUSED)
                 .commitmentStart(now)
                 .commitmentEnd(now.plusSeconds(3600))
@@ -31,19 +31,17 @@ class ElectoralProcessTest {
                 .results(now.plusSeconds(14400))
                 .build();
 
-        assertAll("entity fields",
-                () -> assertEquals("A test electoral process", process.getDescription(),
-                        "description should be stored and retrieved"),
-                () -> assertEquals(ProcessStatus.PAUSED, process.getEstatus(),
-                        "estatus should be stored and retrieved")
+        assertAll("response with optional fields",
+                () -> assertEquals("A test process", response.getDescription()),
+                () -> assertEquals(ProcessStatus.PAUSED, response.getEstatus())
         );
     }
 
     @Test
-    @DisplayName("should default description to null and estatus to NONE")
-    void shouldDefaultDescriptionToNullAndEstatusToNone() {
+    @DisplayName("should default description and estatus to null")
+    void shouldDefaultToNull() {
         var now = Instant.now();
-        var process = ElectoralProcess.builder()
+        var response = ElectoralProcessResponse.builder()
                 .id(UUID.randomUUID())
                 .name("Test Process")
                 .scope("test-scope")
@@ -54,11 +52,9 @@ class ElectoralProcessTest {
                 .results(now.plusSeconds(14400))
                 .build();
 
-        assertAll("default values",
-                () -> assertNull(process.getDescription(),
-                        "description should default to null"),
-                () -> assertEquals(ProcessStatus.NONE, process.getEstatus(),
-                        "estatus should default to NONE")
+        assertAll("default null",
+                () -> assertNull(response.getDescription()),
+                () -> assertNull(response.getEstatus())
         );
     }
 }

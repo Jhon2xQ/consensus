@@ -40,7 +40,11 @@ public class GetProcessResultsUseCase {
         var process = electoralProcessRepository.findById(processId)
                 .orElseThrow(() -> ElectoralProcessException.notFound(processId));
 
-        var state = ProcessStateCalculator.computeState(process, Instant.now());
+        // Keep entity fresh — transitionState auto-computes and persists via dirty checking
+        var now = Instant.now();
+        ProcessStateCalculator.transitionState(process, now);
+
+        var state = ProcessStateCalculator.computeState(process, now);
         if (state != ProcessStatus.CLOSED) {
             throw ElectoralProcessException.invalidState(
                     "Results only available when process is closed");

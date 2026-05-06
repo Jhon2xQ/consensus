@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -61,9 +62,9 @@ class ListElectoralProcessesUseCaseTest {
 
         var page = new PageImpl<>(List.of(process1, process2), pageable, 2);
         when(repository.findAll(pageable)).thenReturn(page);
-        when(mapper.toResponse(process1)).thenReturn(ElectoralProcessResponse.builder()
-                .id(process1.getId()).name("Process A").scope("scope-a").build());
-        when(mapper.toResponse(process2)).thenReturn(ElectoralProcessResponse.builder()
+        when(mapper.toResponse(any(), any())).thenReturn(ElectoralProcessResponse.builder()
+                .id(process1.getId()).name("Process A").scope("scope-a").build(),
+                ElectoralProcessResponse.builder()
                 .id(process2.getId()).name("Process B").scope("scope-b").build());
 
         var result = useCase.execute(pageable);

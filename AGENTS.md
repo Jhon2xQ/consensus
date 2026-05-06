@@ -37,8 +37,6 @@
 com.carmenio.consensus
 ├── application/          # Casos de uso, DTOs, utilidades
 │   ├── dto/
-│   │   ├── request/
-│   │   └── response/
 │   ├── use_case/         # Un use case = una operación de negocio
 │   └── util/
 ├── common/               # Configs, constantes, librerías
@@ -307,12 +305,12 @@ Cada archivo incluye: parámetros, estructura de request/response, y códigos de
 
 **Prefijo base**: `/api/private/`
 
-| Grupo | Archivo | Endpoints |
-|-------|---------|-----------|
+| Grupo            | Archivo                                                                  | Endpoints                        |
+| ---------------- | ------------------------------------------------------------------------ | -------------------------------- |
 | ElectoralProcess | [`docs/ELECTORAL_PROCESS_API_DOC.md`](docs/ELECTORAL_PROCESS_API_DOC.md) | CRUD + estado + listado paginado |
-| Team | [`docs/TEAM_API_DOC.md`](docs/TEAM_API_DOC.md) | CRUD completo |
-| Enrollment | [`docs/ENROLLMENT_API_DOC.md`](docs/ENROLLMENT_API_DOC.md) | Crear, listar, obtener por ID |
-| Record (votos) | [`docs/RECORD_API_DOC.md`](docs/RECORD_API_DOC.md) | Ingresar voto + resultados |
+| Team             | [`docs/TEAM_API_DOC.md`](docs/TEAM_API_DOC.md)                           | CRUD completo                    |
+| Enrollment       | [`docs/ENROLLMENT_API_DOC.md`](docs/ENROLLMENT_API_DOC.md)               | Crear, listar, obtener por ID    |
+| Record (votos)   | [`docs/RECORD_API_DOC.md`](docs/RECORD_API_DOC.md)                       | Ingresar voto + resultados       |
 
 ### 9.1 Reglas para Documentación de API
 

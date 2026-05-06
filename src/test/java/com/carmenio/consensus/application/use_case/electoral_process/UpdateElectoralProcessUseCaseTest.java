@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -55,7 +56,7 @@ class UpdateElectoralProcessUseCaseTest {
         when(repository.findById(id)).thenReturn(Optional.of(existing));
         when(repository.existsByName("New Name")).thenReturn(false);
         when(repository.save(existing)).thenReturn(existing);
-        when(mapper.toResponse(existing)).thenReturn(ElectoralProcessResponse.builder()
+        when(mapper.toResponse(any(), any())).thenReturn(ElectoralProcessResponse.builder()
                 .id(id).name("New Name").scope("original-scope").build());
 
         var result = useCase.execute(id, request);

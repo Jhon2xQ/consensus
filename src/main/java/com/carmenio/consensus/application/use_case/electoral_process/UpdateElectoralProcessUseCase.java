@@ -2,18 +2,21 @@ package com.carmenio.consensus.application.use_case.electoral_process;
 
 import com.carmenio.consensus.application.dto.electoral_process.UpdateElectoralProcessRequest;
 import com.carmenio.consensus.application.dto.electoral_process.ElectoralProcessResponse;
+import com.carmenio.consensus.application.util.ProcessStateCalculator;
 import com.carmenio.consensus.domain.exception.ElectoralProcessException;
 import com.carmenio.consensus.domain.repository.ElectoralProcessRepository;
 import com.carmenio.consensus.infrastructure.mapper.ElectoralProcessMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.util.UUID;
 
 /**
  * Use case for updating an existing electoral process.
  * <p>
- * Validates uniqueness if name is changed.
+ * Validates uniqueness if name is changed, then auto-transitions
+ * estatus via {@link ProcessStateCalculator#transitionState}.
  */
 @Component
 @RequiredArgsConstructor
@@ -41,7 +44,11 @@ public class UpdateElectoralProcessUseCase {
         }
 
         mapper.updateEntity(entity, request);
+
+        // Auto-transition estatus based on current dates (respects PAUSED/CANCELLED locks)
+        ProcessStateCalculator.transitionState(entity, Instant.now());
         var saved = repository.save(entity);
-        return mapper.toResponse(saved);
+
+        return mapper.toResponse(saved, saved.getEstatus());
     }
 }

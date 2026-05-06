@@ -8,6 +8,10 @@ import java.time.Instant;
 
 /**
  * Request DTO for creating a new electoral process.
+ * <p>
+ * {@code estatus} is not part of the create request — it defaults to
+ * {@code NONE} on the entity and is auto-transitioned by
+ * {@code ProcessStateCalculator.transitionState()} after save.
  */
 @Getter
 @Setter
@@ -21,6 +25,8 @@ public class CreateElectoralProcessRequest {
 
     @NotBlank(message = "Process scope is required")
     private String scope;
+
+    private String description;
 
     @NotNull(message = "Commitment start date is required")
     private Instant commitmentStart;

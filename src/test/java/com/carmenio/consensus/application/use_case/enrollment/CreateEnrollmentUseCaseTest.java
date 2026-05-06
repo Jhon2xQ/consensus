@@ -78,6 +78,30 @@ class CreateEnrollmentUseCaseTest {
                     .votingEnd(now.minusSeconds(3600))
                     .results(now.minusSeconds(1))
                     .build();
+            case PAUSED -> {
+                var p = ElectoralProcess.builder()
+                        .id(UUID.randomUUID())
+                        .commitmentStart(now.minusSeconds(3600))
+                        .commitmentEnd(now.plusSeconds(3600))
+                        .votingStart(now.plusSeconds(7200))
+                        .votingEnd(now.plusSeconds(14400))
+                        .results(now.plusSeconds(21600))
+                        .build();
+                p.setEstatus(ProcessStatus.PAUSED);
+                yield p;
+            }
+            case CANCELLED -> {
+                var p = ElectoralProcess.builder()
+                        .id(UUID.randomUUID())
+                        .commitmentStart(now.minusSeconds(3600))
+                        .commitmentEnd(now.plusSeconds(3600))
+                        .votingStart(now.plusSeconds(7200))
+                        .votingEnd(now.plusSeconds(14400))
+                        .results(now.plusSeconds(21600))
+                        .build();
+                p.setEstatus(ProcessStatus.CANCELLED);
+                yield p;
+            }
         };
     }
 
@@ -182,6 +206,52 @@ class CreateEnrollmentUseCaseTest {
     void shouldThrow400WhenProcessInVoting() {
         var now = Instant.now();
         var process = createProcess(now, ProcessStatus.VOTING);
+        var processId = process.getId();
+        var request = CreateEnrollmentRequest.builder()
+                .electoralProcessId(processId)
+                .userId("user-123")
+                .commitment("1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+                .build();
+
+        when(electoralProcessRepository.findById(processId))
+                .thenReturn(Optional.of(process));
+
+        var exception = assertThrows(EnrollmentException.class,
+                () -> useCase.execute(request));
+
+        assertTrue(exception.getMessage().contains("Enrollment not open"));
+        assertEquals(400, exception.getStatusCode());
+        verify(enrollmentRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Should throw 400 when process is PAUSED (lock state)")
+    void shouldThrow400WhenProcessIsPaused() {
+        var now = Instant.now();
+        var process = createProcess(now, ProcessStatus.PAUSED);
+        var processId = process.getId();
+        var request = CreateEnrollmentRequest.builder()
+                .electoralProcessId(processId)
+                .userId("user-123")
+                .commitment("1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+                .build();
+
+        when(electoralProcessRepository.findById(processId))
+                .thenReturn(Optional.of(process));
+
+        var exception = assertThrows(EnrollmentException.class,
+                () -> useCase.execute(request));
+
+        assertTrue(exception.getMessage().contains("Enrollment not open"));
+        assertEquals(400, exception.getStatusCode());
+        verify(enrollmentRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Should throw 400 when process is CANCELLED (lock state)")
+    void shouldThrow400WhenProcessIsCancelled() {
+        var now = Instant.now();
+        var process = createProcess(now, ProcessStatus.CANCELLED);
         var processId = process.getId();
         var request = CreateEnrollmentRequest.builder()
                 .electoralProcessId(processId)
