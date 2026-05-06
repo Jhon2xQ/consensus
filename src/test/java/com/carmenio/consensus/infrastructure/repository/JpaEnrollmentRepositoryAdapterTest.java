@@ -3,7 +3,6 @@ package com.carmenio.consensus.infrastructure.repository;
 import com.carmenio.consensus.domain.entity.Enrollment;
 import com.carmenio.consensus.domain.repository.EnrollmentRepository;
 import jakarta.persistence.EntityManager;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

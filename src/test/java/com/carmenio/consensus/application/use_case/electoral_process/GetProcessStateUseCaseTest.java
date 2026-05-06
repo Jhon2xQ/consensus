@@ -1,6 +1,5 @@
 package com.carmenio.consensus.application.use_case.electoral_process;
 
-import com.carmenio.consensus.application.dto.electoral_process.ProcessStateResponse;
 import com.carmenio.consensus.common.constant.ProcessStatus;
 import com.carmenio.consensus.domain.entity.ElectoralProcess;
 import com.carmenio.consensus.domain.exception.ElectoralProcessException;

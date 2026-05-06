@@ -1,6 +1,5 @@
 package com.carmenio.consensus.application.util;
 
-import com.carmenio.consensus.application.dto.record.TeamResult;
 import com.carmenio.consensus.domain.entity.Team;
 import com.carmenio.consensus.domain.entity.VoteRecord;
 import org.junit.jupiter.api.DisplayName;

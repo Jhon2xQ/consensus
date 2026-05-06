@@ -1,7 +1,6 @@
 package com.carmenio.consensus.infrastructure.mapper;
 
 import com.carmenio.consensus.application.dto.team.CreateTeamRequest;
-import com.carmenio.consensus.application.dto.team.TeamResponse;
 import com.carmenio.consensus.domain.entity.Team;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

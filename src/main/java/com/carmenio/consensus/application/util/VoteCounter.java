@@ -4,7 +4,6 @@ import com.carmenio.consensus.application.dto.record.TeamResult;
 import com.carmenio.consensus.domain.entity.Team;
 import com.carmenio.consensus.domain.entity.VoteRecord;
 
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;

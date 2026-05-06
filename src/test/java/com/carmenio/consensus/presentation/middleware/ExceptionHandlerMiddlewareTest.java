@@ -1,6 +1,5 @@
 package com.carmenio.consensus.presentation.middleware;
 
-import com.carmenio.consensus.domain.exception.DomainException;
 import com.carmenio.consensus.domain.exception.ElectoralProcessException;
 import com.carmenio.consensus.presentation.schema.ApiResponse;
 import org.junit.jupiter.api.BeforeEach;

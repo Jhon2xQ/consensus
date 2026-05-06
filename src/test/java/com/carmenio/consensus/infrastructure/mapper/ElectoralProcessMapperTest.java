@@ -1,7 +1,6 @@
 package com.carmenio.consensus.infrastructure.mapper;
 
 import com.carmenio.consensus.application.dto.electoral_process.CreateElectoralProcessRequest;
-import com.carmenio.consensus.application.dto.electoral_process.ElectoralProcessResponse;
 import com.carmenio.consensus.application.dto.electoral_process.UpdateElectoralProcessRequest;
 import com.carmenio.consensus.domain.entity.ElectoralProcess;
 import org.junit.jupiter.api.DisplayName;

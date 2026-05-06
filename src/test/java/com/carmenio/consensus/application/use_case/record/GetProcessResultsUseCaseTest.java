@@ -1,10 +1,5 @@
 package com.carmenio.consensus.application.use_case.record;
 
-import com.carmenio.consensus.application.dto.record.ProcessResultsResponse;
-import com.carmenio.consensus.application.dto.record.TeamResult;
-import com.carmenio.consensus.application.util.ProcessStateCalculator;
-import com.carmenio.consensus.application.util.VoteCounter;
-import com.carmenio.consensus.common.constant.ProcessStatus;
 import com.carmenio.consensus.domain.entity.ElectoralProcess;
 import com.carmenio.consensus.domain.entity.Team;
 import com.carmenio.consensus.domain.entity.VoteRecord;
