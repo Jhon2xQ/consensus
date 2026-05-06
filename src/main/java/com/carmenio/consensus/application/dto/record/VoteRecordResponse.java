@@ -2,7 +2,7 @@ package com.carmenio.consensus.application.dto.record;
 
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 /**
@@ -21,5 +21,5 @@ public class VoteRecordResponse {
     private String message;
     private String scope;
     private String transactionHash;
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 }

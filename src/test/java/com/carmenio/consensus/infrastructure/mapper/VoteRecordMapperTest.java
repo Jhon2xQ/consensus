@@ -8,7 +8,7 @@ import com.carmenio.consensus.domain.entity.VoteRecord;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -47,7 +47,7 @@ class VoteRecordMapperTest {
     @DisplayName("Should map VoteRecord entity to VoteRecordResponse")
     void shouldMapEntityToResponse() {
         var id = UUID.randomUUID();
-        var createdAt = LocalDateTime.now();
+        var createdAt = Instant.now();
         var entity = VoteRecord.builder()
                 .id(id)
                 .groupId("1")
@@ -78,7 +78,7 @@ class VoteRecordMapperTest {
                 .nullifier("22222222222222222222222222222222")
                 .message("Team Beta")
                 .scope("44444444444444444444444444444444")
-                .createdAt(LocalDateTime.now())
+                .createdAt(Instant.now())
                 .build();
 
         var response = mapper.toResponse(entity);
@@ -124,7 +124,7 @@ class VoteRecordMapperTest {
     @DisplayName("Should create VoteRecordResponse with all fields via builder")
     void shouldCreateVoteRecordResponse() {
         var id = UUID.randomUUID();
-        var createdAt = LocalDateTime.now();
+        var createdAt = Instant.now();
         var response = VoteRecordResponse.builder()
                 .id(id)
                 .groupId("1")

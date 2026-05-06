@@ -79,26 +79,26 @@ class ElectoralProcessTest {
     }
 
     @Test
-    @DisplayName("should have same values with all-args constructor")
-    void shouldHaveSameValuesWithAllArgsConstructor() {
+    @DisplayName("should have same values with Builder")
+    void shouldHaveSameValuesWithBuilder() {
         var now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         var id = UUID.randomUUID();
 
-        var process = new ElectoralProcess(
-                id,
-                "All Args Test",
-                "all-args-test",
-                now,
-                now.plusSeconds(3600),
-                now.plusSeconds(7200),
-                now.plusSeconds(10800),
-                now.plusSeconds(14400)
-        );
+        var process = ElectoralProcess.builder()
+                .id(id)
+                .name("Builder Test")
+                .scope("builder-test")
+                .commitmentStart(now)
+                .commitmentEnd(now.plusSeconds(3600))
+                .votingStart(now.plusSeconds(7200))
+                .votingEnd(now.plusSeconds(10800))
+                .results(now.plusSeconds(14400))
+                .build();
 
-        assertAll("all-args constructor",
+        assertAll("builder",
                 () -> assertEquals(id, process.getId()),
-                () -> assertEquals("All Args Test", process.getName()),
-                () -> assertEquals("all-args-test", process.getScope()),
+                () -> assertEquals("Builder Test", process.getName()),
+                () -> assertEquals("builder-test", process.getScope()),
                 () -> assertEquals(now, process.getCommitmentStart()),
                 () -> assertEquals(now.plusSeconds(3600), process.getCommitmentEnd()),
                 () -> assertEquals(now.plusSeconds(7200), process.getVotingStart()),

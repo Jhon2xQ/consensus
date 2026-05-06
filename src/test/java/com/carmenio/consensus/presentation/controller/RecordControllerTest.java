@@ -17,7 +17,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -59,7 +59,7 @@ class RecordControllerTest {
                 .message("Team Alpha")
                 .scope("scope-123")
                 .transactionHash("0xabc")
-                .createdAt(LocalDateTime.now())
+                .createdAt(Instant.now())
                 .build();
 
         when(createVoteRecordUseCase.execute(any())).thenReturn(response);

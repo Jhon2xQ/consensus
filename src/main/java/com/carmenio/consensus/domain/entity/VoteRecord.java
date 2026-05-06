@@ -2,8 +2,11 @@ package com.carmenio.consensus.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 /**
@@ -25,6 +28,7 @@ import java.util.UUID;
 @Table(name = "vote_records", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"nullifier"})
 })
+@EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -51,11 +55,11 @@ public class VoteRecord {
     @Column
     private String transactionHash;
 
+    @CreatedDate
     @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
+    @LastModifiedDate
+    @Column(nullable = false)
+    private Instant updatedAt;
 }
