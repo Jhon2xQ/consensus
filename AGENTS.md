@@ -18,16 +18,16 @@
 
 ## 2. Stack Tecnológico
 
-| Capa | Tecnología | Versión |
-|------|-----------|---------|
-| Framework | Spring Boot | 4.0.6 |
-| Lenguaje | Java | 25 |
-| JVM Target | — | 25 |
-| Base de datos | PostgreSQL | Latest |
-| ORM | Spring Data JPA (Hibernate) | — |
-| Testing | JUnit 5 + Mockito | — |
-| Build | Maven | — |
-| Virtual Threads | Activadas (`spring.threads.virtual.enabled=true`) | — |
+| Capa            | Tecnología                                        | Versión |
+| --------------- | ------------------------------------------------- | ------- |
+| Framework       | Spring Boot                                       | 4.0.6   |
+| Lenguaje        | Java                                              | 25      |
+| JVM Target      | —                                                 | 25      |
+| Base de datos   | PostgreSQL                                        | Latest  |
+| ORM             | Spring Data JPA (Hibernate)                       | —       |
+| Testing         | JUnit 5 + Mockito                                 | —       |
+| Build           | Maven                                             | —       |
+| Virtual Threads | Activadas (`spring.threads.virtual.enabled=true`) | —       |
 
 ---
 
@@ -53,11 +53,9 @@ com.carmenio.consensus
 │   ├── mapper/
 │   ├── repository/       # Adapters (implementaciones JPA)
 │   └── service/
-├── presentation/         # Controllers, middlewares (filters), validaciones
+├── presentation/         # controladores y middlewares
 │   ├── controller/
-│   │   └── private_/     # Todos los endpoints son /api/private/* por ahora
 │   ├── middleware/
-│   └── schema/
 └── ConsensusApplication.java
 ```
 
@@ -67,20 +65,20 @@ com.carmenio.consensus
 
 ## 4. Convenciones de Nombres
 
-| Elemento | Convención | Ejemplo |
-|----------|-----------|---------|
-| Paquetes | `snake_case` | `com.carmenio.consensus.application.use_case` |
-| Clases | `PascalCase` | `ElectoralProcessController` |
-| Interfaces | `PascalCase` | `ElectoralProcessRepository` |
-| Métodos | `camelCase` | `findById` |
-| Variables | `camelCase` | `processId` |
-| Constantes | `UPPER_SNAKE_CASE` | `DEFAULT_PAGE_SIZE` |
-| Enums | `PascalCase` | `ProcessStatus` |
-| Archivos de config | `kebab-case` | `application.properties` |
-| Use cases | `PascalCase` + sufijo | `CreateElectoralProcessUseCase` |
-| DTOs request | `PascalCase` + sufijo | `CreateElectoralProcessRequest` |
-| DTOs response | `PascalCase` + sufijo | `ElectoralProcessResponse` |
-| Mappers | `PascalCase` + sufijo | `ElectoralProcessMapper` |
+| Elemento           | Convención            | Ejemplo                                       |
+| ------------------ | --------------------- | --------------------------------------------- |
+| Paquetes           | `snake_case`          | `com.carmenio.consensus.application.use_case` |
+| Clases             | `PascalCase`          | `ElectoralProcessController`                  |
+| Interfaces         | `PascalCase`          | `ElectoralProcessRepository`                  |
+| Métodos            | `camelCase`           | `findById`                                    |
+| Variables          | `camelCase`           | `processId`                                   |
+| Constantes         | `UPPER_SNAKE_CASE`    | `DEFAULT_PAGE_SIZE`                           |
+| Enums              | `PascalCase`          | `ProcessStatus`                               |
+| Archivos de config | `kebab-case`          | `application.properties`                      |
+| Use cases          | `PascalCase` + sufijo | `CreateElectoralProcessUseCase`               |
+| DTOs request       | `PascalCase` + sufijo | `CreateElectoralProcessRequest`               |
+| DTOs response      | `PascalCase` + sufijo | `ElectoralProcessResponse`                    |
+| Mappers            | `PascalCase` + sufijo | `ElectoralProcessMapper`                      |
 
 ---
 
@@ -94,12 +92,12 @@ Los estados se **calculan en tiempo real**, NO se persisten:
 NONE → COMMITMENT → NONE → VOTING → NONE → CLOSED
 ```
 
-| Estado | Condición |
-|--------|-----------|
-| NONE | `now < commitmentStart` OR `commitmentEnd < now < votingStart` OR `votingEnd < now < results` |
-| COMMITMENT | `commitmentStart ≤ now ≤ commitmentEnd` |
-| VOTING | `votingStart ≤ now ≤ votingEnd` |
-| CLOSED | `results ≤ now` |
+| Estado     | Condición                                                                                     |
+| ---------- | --------------------------------------------------------------------------------------------- |
+| NONE       | `now < commitmentStart` OR `commitmentEnd < now < votingStart` OR `votingEnd < now < results` |
+| COMMITMENT | `commitmentStart ≤ now ≤ commitmentEnd`                                                       |
+| VOTING     | `votingStart ≤ now ≤ votingEnd`                                                               |
+| CLOSED     | `results ≤ now`                                                                               |
 
 ### 5.2 Validaciones por Estado
 
@@ -132,7 +130,7 @@ NONE → COMMITMENT → NONE → VOTING → NONE → CLOSED
 public class CreateElectoralProcessUseCase {
     private final ElectoralProcessRepository repository;
     private final ElectoralProcessMapper mapper;
-    
+
     public ElectoralProcessResponse execute(CreateElectoralProcessRequest request) {
         // validaciones
         // lógica de negocio
@@ -150,7 +148,7 @@ public class CreateElectoralProcessUseCase {
 @RequiredArgsConstructor
 public class ElectoralProcessController {
     private final CreateElectoralProcessUseCase createUseCase;
-    
+
     @PostMapping("/api/private/processes")
     public ResponseEntity<ApiResponse> create(@RequestBody CreateElectoralProcessRequest request) {
         var response = createUseCase.execute(request);
@@ -189,6 +187,7 @@ TODAS las respuestas usan este wrapper:
 ## 7. Anti-Patrones (NUNCA HACER)
 
 ### ❌ Lógica de negocio en el controller
+
 ```java
 // MAL
 @PostMapping("/processes")
@@ -199,6 +198,7 @@ public ResponseEntity<?> create(@RequestBody ProcessDTO dto) {
 ```
 
 ### ❌ Entidad JPA expuesta en la API
+
 ```java
 // MAL
 @GetMapping("/processes/{id}")
@@ -208,6 +208,7 @@ public ElectoralProcess get(@PathVariable UUID id) {  // Retorna entidad JPA dir
 ```
 
 ### ❌ IDs autoincrementales
+
 ```java
 // MAL
 @Id
@@ -216,6 +217,7 @@ private Long id;
 ```
 
 ### ❌ `null` sin manejar
+
 ```java
 // MAL
 public Process findById(UUID id) {
@@ -224,6 +226,7 @@ public Process findById(UUID id) {
 ```
 
 ### ❌ Lógica de negocio en entidades
+
 ```java
 // MAL (anemic domain model)
 @Entity
@@ -233,6 +236,7 @@ public class ElectoralProcess {
 ```
 
 ### ❌ Repositorio accediendo a otro repositorio
+
 ```java
 // MAL
 public class TeamRepository {
@@ -247,11 +251,11 @@ public class TeamRepository {
 
 ### 8.1 Estrategia
 
-| Tipo | Cobertura | Herramienta |
-|------|-----------|-------------|
-| Unit tests | Use cases, domain services, mappers | JUnit 5 + Mockito |
+| Tipo              | Cobertura                            | Herramienta                       |
+| ----------------- | ------------------------------------ | --------------------------------- |
+| Unit tests        | Use cases, domain services, mappers  | JUnit 5 + Mockito                 |
 | Integration tests | Controllers, repositories, endpoints | Spring Boot Test + Testcontainers |
-| Contract tests | Request/response DTOs | Spring MVC Test |
+| Contract tests    | Request/response DTOs                | Spring MVC Test                   |
 
 ### 8.2 Convenciones de Nombres de Tests
 
@@ -296,33 +300,31 @@ src/test/java/com/carmenio/consensus
 
 ---
 
-## 9. Endpoints
+## 9. Endpoints — Documentación
+
+La documentación detallada de cada grupo de endpoints está en archivos separados dentro de `docs/`.
+Cada archivo incluye: parámetros, estructura de request/response, y códigos de estado.
 
 **Prefijo base**: `/api/private/`
 
-### ElectoralProcess
-- `POST /api/private/processes` — Crear
-- `GET /api/private/processes` — Listar (paginado)
-- `GET /api/private/processes/{id}` — Obtener
-- `PUT /api/private/processes/{id}` — Actualizar
-- `DELETE /api/private/processes/{id}` — Eliminar
-- `GET /api/private/processes/{id}/state` — Estado actual
-- `GET /api/private/processes/{id}/results` — Resultados
+| Grupo | Archivo | Endpoints |
+|-------|---------|-----------|
+| ElectoralProcess | [`docs/ELECTORAL_PROCESS_API_DOC.md`](docs/ELECTORAL_PROCESS_API_DOC.md) | CRUD + estado + listado paginado |
+| Team | [`docs/TEAM_API_DOC.md`](docs/TEAM_API_DOC.md) | CRUD completo |
+| Enrollment | [`docs/ENROLLMENT_API_DOC.md`](docs/ENROLLMENT_API_DOC.md) | Crear, listar, obtener por ID |
+| Record (votos) | [`docs/RECORD_API_DOC.md`](docs/RECORD_API_DOC.md) | Ingresar voto + resultados |
 
-### Team
-- `POST /api/private/processes/{processId}/teams`
-- `GET /api/private/processes/{processId}/teams`
-- `GET /api/private/teams/{id}`
-- `PUT /api/private/teams/{id}`
-- `DELETE /api/private/teams/{id}`
+### 9.1 Reglas para Documentación de API
 
-### Enrollment
-- `POST /api/private/processes/{processId}/enrollments`
-- `GET /api/private/processes/{processId}/enrollments`
-- `GET /api/private/enrollments/{id}`
+Cuando crees o actualices documentación de endpoints, seguí estas reglas:
 
-### Record
-- `POST /api/private/records` — Consumido por Semaphore Relayer
+- **Un archivo por grupo de endpoints** — Nombre en `UPPER_SNAKE_CASE` + `_API_DOC.md` (ej. `TEAM_API_DOC.md`)
+- **Índice rápido al inicio** — Enlaces anchor ordenados por método HTTP: GET → POST → PUT → DELETE
+- **Sin ejemplos concretos** — Mostrar solo la estructura con tipos, no valores de ejemplo
+- **Estructura completa** — Incluir: parámetros (path/query), request body, response exitosa, y TODOS los códigos de error posibles con sus respuestas
+- **Campos opcionales vs requeridos** — Marcar claramente con `(requerido)` / `(opcional)` en cada campo
+- **Consistencia de tipos** — Usar `"uuid"`, `"string"`, `"integer"`, `"instant (ISO-8601)"`, `"boolean"`
+- **Ubicación** — Siempre en `docs/`, nunca en la raíz del proyecto
 
 ---
 
@@ -331,6 +333,7 @@ src/test/java/com/carmenio/consensus
 El Semaphore Relayer (microservicio Node/Bun) escucha eventos `ProofValidated` on-chain y consume `POST /api/private/records` para persistir votos.
 
 **Evento esperado**:
+
 ```json
 {
   "groupId": "1",
@@ -346,14 +349,14 @@ El Semaphore Relayer (microservicio Node/Bun) escucha eventos `ProofValidated` o
 
 ## 11. Código de Estado HTTP
 
-| Código | Uso |
-|--------|-----|
-| 200 | Operación exitosa |
-| 201 | Recurso creado |
-| 400 | Error de validación de negocio |
-| 404 | Recurso no encontrado |
-| 409 | Conflicto (duplicado, dependencias) |
-| 500 | Error interno del servidor |
+| Código | Uso                                 |
+| ------ | ----------------------------------- |
+| 200    | Operación exitosa                   |
+| 201    | Recurso creado                      |
+| 400    | Error de validación de negocio      |
+| 404    | Recurso no encontrado               |
+| 409    | Conflicto (duplicado, dependencias) |
+| 500    | Error interno del servidor          |
 
 ---
 
