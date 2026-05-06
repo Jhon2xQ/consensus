@@ -38,11 +38,7 @@ public class CreateTeamUseCase {
         electoralProcessRepository.findById(processId)
                 .orElseThrow(() -> ElectoralProcessException.notFound(processId));
 
-        var existingTeams = teamRepository.findByElectoralProcessId(processId);
-        var nameExists = existingTeams.stream()
-                .anyMatch(t -> t.getName().equals(request.getName()));
-
-        if (nameExists) {
+        if (teamRepository.existsByElectoralProcessIdAndName(processId, request.getName())) {
             throw TeamException.alreadyExists(request.getName());
         }
 

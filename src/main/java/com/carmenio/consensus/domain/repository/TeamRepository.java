@@ -22,4 +22,6 @@ public interface TeamRepository {
     boolean existsById(UUID id);
 
     boolean existsByProcessId(UUID processId);
+
+    boolean existsByElectoralProcessIdAndName(UUID electoralProcessId, String name);
 }

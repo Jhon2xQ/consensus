@@ -48,4 +48,9 @@ public class JpaTeamRepositoryAdapter implements TeamRepository {
     public boolean existsByProcessId(UUID processId) {
         return jpaRepository.existsByElectoralProcessId(processId);
     }
+
+    @Override
+    public boolean existsByElectoralProcessIdAndName(UUID electoralProcessId, String name) {
+        return jpaRepository.existsByElectoralProcessIdAndName(electoralProcessId, name);
+    }
 }

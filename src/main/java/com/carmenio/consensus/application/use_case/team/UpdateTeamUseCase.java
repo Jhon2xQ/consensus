@@ -36,10 +36,7 @@ public class UpdateTeamUseCase {
                 .orElseThrow(() -> TeamException.notFound(id));
 
         if (name != null && !name.equals(entity.getName())) {
-            var siblings = teamRepository.findByElectoralProcessId(entity.getElectoralProcessId());
-            var nameExists = siblings.stream()
-                    .anyMatch(t -> !t.getId().equals(id) && t.getName().equals(name));
-            if (nameExists) {
+            if (teamRepository.existsByElectoralProcessIdAndName(entity.getElectoralProcessId(), name)) {
                 throw TeamException.alreadyExists(name);
             }
             entity.setName(name);

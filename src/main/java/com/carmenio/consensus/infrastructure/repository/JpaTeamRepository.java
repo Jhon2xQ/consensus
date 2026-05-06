@@ -19,4 +19,6 @@ interface JpaTeamRepository extends JpaRepository<Team, UUID> {
     List<Team> findByElectoralProcessId(UUID electoralProcessId);
 
     boolean existsByElectoralProcessId(UUID electoralProcessId);
+
+    boolean existsByElectoralProcessIdAndName(UUID electoralProcessId, String name);
 }

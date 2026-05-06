@@ -12,7 +12,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -49,7 +48,8 @@ class UpdateTeamUseCaseTest {
                 .build();
 
         when(teamRepository.findById(id)).thenReturn(Optional.of(existingTeam));
-        when(teamRepository.findByElectoralProcessId(processId)).thenReturn(List.of(existingTeam));
+        when(teamRepository.existsByElectoralProcessIdAndName(processId, "New Name"))
+                .thenReturn(false);
         when(teamRepository.save(existingTeam)).thenReturn(existingTeam);
         when(mapper.toResponse(existingTeam)).thenReturn(expectedResponse);
 
@@ -58,7 +58,7 @@ class UpdateTeamUseCaseTest {
         assertNotNull(result);
         assertEquals("New Name", result.getName());
         verify(teamRepository).findById(id);
-        verify(teamRepository).findByElectoralProcessId(processId);
+        verify(teamRepository).existsByElectoralProcessIdAndName(processId, "New Name");
         verify(teamRepository).save(existingTeam);
         verify(mapper).toResponse(existingTeam);
     }
@@ -115,15 +115,9 @@ class UpdateTeamUseCaseTest {
                 .electoralProcessId(processId)
                 .build();
 
-        var conflictingTeam = Team.builder()
-                .id(UUID.randomUUID())
-                .name("New Name")
-                .electoralProcessId(processId)
-                .build();
-
         when(teamRepository.findById(id)).thenReturn(Optional.of(existingTeam));
-        when(teamRepository.findByElectoralProcessId(processId))
-                .thenReturn(List.of(conflictingTeam));
+        when(teamRepository.existsByElectoralProcessIdAndName(processId, "New Name"))
+                .thenReturn(true);
 
         var exception = assertThrows(TeamException.class,
                 () -> useCase.execute(id, "New Name", null));

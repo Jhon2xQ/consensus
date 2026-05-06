@@ -63,8 +63,8 @@ class CreateTeamUseCaseTest {
 
         when(electoralProcessRepository.findById(processId))
                 .thenReturn(Optional.of(new ElectoralProcess()));
-        when(teamRepository.findByElectoralProcessId(processId))
-                .thenReturn(java.util.Collections.emptyList());
+        when(teamRepository.existsByElectoralProcessIdAndName(processId, "Team Alpha"))
+                .thenReturn(false);
         var expectedResponse = TeamResponse.builder()
                 .id(savedEntity.getId())
                 .name("Team Alpha")
@@ -81,7 +81,7 @@ class CreateTeamUseCaseTest {
         assertEquals("Team Alpha", result.getName());
         assertEquals(processId, result.getElectoralProcessId());
         verify(electoralProcessRepository).findById(processId);
-        verify(teamRepository).findByElectoralProcessId(processId);
+        verify(teamRepository).existsByElectoralProcessIdAndName(processId, "Team Alpha");
         verify(mapper).toEntity(request);
         verify(teamRepository).save(entity);
         verify(mapper).toResponse(savedEntity);
@@ -115,14 +115,10 @@ class CreateTeamUseCaseTest {
                 .electoralProcessId(processId)
                 .build();
 
-        var existingTeam = new Team();
-        existingTeam.setName("Team Alpha");
-        existingTeam.setElectoralProcessId(processId);
-
         when(electoralProcessRepository.findById(processId))
                 .thenReturn(Optional.of(new ElectoralProcess()));
-        when(teamRepository.findByElectoralProcessId(processId))
-                .thenReturn(java.util.List.of(existingTeam));
+        when(teamRepository.existsByElectoralProcessIdAndName(processId, "Team Alpha"))
+                .thenReturn(true);
 
         var exception = assertThrows(TeamException.class,
                 () -> useCase.execute(request));
