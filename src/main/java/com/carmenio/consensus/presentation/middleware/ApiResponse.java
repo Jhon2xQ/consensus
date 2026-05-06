@@ -1,4 +1,4 @@
-package com.carmenio.consensus.presentation.schema;
+package com.carmenio.consensus.presentation.middleware;
 
 import lombok.Getter;
 

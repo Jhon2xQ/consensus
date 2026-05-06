@@ -5,7 +5,8 @@ import com.carmenio.consensus.application.dto.record.ProcessResultsResponse;
 import com.carmenio.consensus.application.dto.record.VoteRecordResponse;
 import com.carmenio.consensus.application.use_case.record.CreateVoteRecordUseCase;
 import com.carmenio.consensus.application.use_case.record.GetProcessResultsUseCase;
-import com.carmenio.consensus.presentation.schema.ApiResponse;
+import com.carmenio.consensus.presentation.middleware.ApiResponse;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

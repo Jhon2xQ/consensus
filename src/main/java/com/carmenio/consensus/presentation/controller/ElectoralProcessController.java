@@ -6,7 +6,8 @@ import com.carmenio.consensus.application.dto.electoral_process.PaginatedRespons
 import com.carmenio.consensus.application.dto.electoral_process.ProcessStateResponse;
 import com.carmenio.consensus.application.dto.electoral_process.UpdateElectoralProcessRequest;
 import com.carmenio.consensus.application.use_case.electoral_process.*;
-import com.carmenio.consensus.presentation.schema.ApiResponse;
+import com.carmenio.consensus.presentation.middleware.ApiResponse;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;

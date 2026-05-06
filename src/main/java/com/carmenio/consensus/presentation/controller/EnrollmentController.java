@@ -5,7 +5,8 @@ import com.carmenio.consensus.application.dto.enrollment.EnrollmentResponse;
 import com.carmenio.consensus.application.use_case.enrollment.CreateEnrollmentUseCase;
 import com.carmenio.consensus.application.use_case.enrollment.FindEnrollmentByIdUseCase;
 import com.carmenio.consensus.application.use_case.enrollment.ListEnrollmentsByProcessUseCase;
-import com.carmenio.consensus.presentation.schema.ApiResponse;
+import com.carmenio.consensus.presentation.middleware.ApiResponse;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

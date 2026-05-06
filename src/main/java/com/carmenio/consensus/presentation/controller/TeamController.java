@@ -4,7 +4,8 @@ import com.carmenio.consensus.application.dto.team.CreateTeamRequest;
 import com.carmenio.consensus.application.dto.team.TeamResponse;
 import com.carmenio.consensus.application.dto.team.UpdateTeamRequest;
 import com.carmenio.consensus.application.use_case.team.*;
-import com.carmenio.consensus.presentation.schema.ApiResponse;
+import com.carmenio.consensus.presentation.middleware.ApiResponse;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

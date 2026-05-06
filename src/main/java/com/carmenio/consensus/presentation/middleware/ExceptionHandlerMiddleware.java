@@ -1,7 +1,7 @@
 package com.carmenio.consensus.presentation.middleware;
 
 import com.carmenio.consensus.domain.exception.DomainException;
-import com.carmenio.consensus.presentation.schema.ApiResponse;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;

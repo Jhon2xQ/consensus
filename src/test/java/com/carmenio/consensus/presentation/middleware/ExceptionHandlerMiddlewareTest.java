@@ -1,7 +1,7 @@
 package com.carmenio.consensus.presentation.middleware;
 
 import com.carmenio.consensus.domain.exception.ElectoralProcessException;
-import com.carmenio.consensus.presentation.schema.ApiResponse;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
