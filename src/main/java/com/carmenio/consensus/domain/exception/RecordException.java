@@ -25,4 +25,8 @@ public class RecordException extends DomainException {
     public static RecordException duplicateNullifier() {
         return new RecordException("A record with this nullifier already exists", 409);
     }
+
+    public static RecordException invalidMessage() {
+        return new RecordException("Record message does not match any team in the process", 400);
+    }
 }
