@@ -21,11 +21,11 @@ Lista todos los procesos electorales con paginación.
 
 ### Parámetros (Query)
 
-| Nombre | Tipo | Requerido | Descripción |
-|--------|------|-----------|-------------|
-| `page` | integer | No | Número de página (default: 0) |
-| `size` | integer | No | Tamaño de página (default: 20) |
-| `sort` | string | No | Campo de ordenación, ej. `name,asc` |
+| Nombre | Tipo    | Requerido | Descripción                         |
+| ------ | ------- | --------- | ----------------------------------- |
+| `page` | integer | No        | Número de página (default: 0)       |
+| `size` | integer | No        | Tamaño de página (default: 20)      |
+| `sort` | string  | No        | Campo de ordenación, ej. `name,asc` |
 
 ### Respuesta `200 OK`
 
@@ -40,7 +40,7 @@ Lista todos los procesos electorales con paginación.
         "name": "string",
         "scope": "string",
         "description": "string | null",
-        "estatus": "NONE | COMMITMENT | VOTING | CLOSED | PAUSED | CANCELLED",
+        "estatus": "NONE | COMMITMENT | VOTING | CLOSED",
         "commitmentStart": "instant (ISO-8601)",
         "commitmentEnd": "instant (ISO-8601)",
         "votingStart": "instant (ISO-8601)",
@@ -66,8 +66,8 @@ Obtiene un proceso electoral por su ID.
 ### Parámetros (Path)
 
 | Nombre | Tipo | Requerido |
-|--------|------|-----------|
-| `id` | UUID | Sí |
+| ------ | ---- | --------- |
+| `id`   | UUID | Sí        |
 
 ### Respuesta `200 OK`
 
@@ -111,8 +111,8 @@ Obtiene el estado del proceso electoral. El estado se calcula en tiempo real bas
 ### Parámetros (Path)
 
 | Nombre | Tipo | Requerido |
-|--------|------|-----------|
-| `id` | UUID | Sí |
+| ------ | ---- | --------- |
+| `id`   | UUID | Sí        |
 
 ### Respuesta `200 OK`
 
@@ -130,14 +130,14 @@ Obtiene el estado del proceso electoral. El estado se calcula en tiempo real bas
 
 ### Posibles estados
 
-| Estado | Condición |
-|--------|-----------|
-| `NONE` | Antes de `commitmentStart`, entre `commitmentEnd` y `votingStart`, o entre `votingEnd` y `results` |
-| `COMMITMENT` | `commitmentStart ≤ now ≤ commitmentEnd` |
-| `VOTING` | `votingStart ≤ now ≤ votingEnd` |
-| `CLOSED` | `results ≤ now` |
-| `PAUSED` | Sobreescritura manual — pausa temporal, bloquea inscripciones y resultados |
-| `CANCELLED` | Sobreescritura manual — cancelación irreversible, bloquea todas las operaciones |
+| Estado       | Condición                                                                                          |
+| ------------ | -------------------------------------------------------------------------------------------------- |
+| `NONE`       | Antes de `commitmentStart`, entre `commitmentEnd` y `votingStart`, o entre `votingEnd` y `results` |
+| `COMMITMENT` | `commitmentStart ≤ now ≤ commitmentEnd`                                                            |
+| `VOTING`     | `votingStart ≤ now ≤ votingEnd`                                                                    |
+| `CLOSED`     | `results ≤ now`                                                                                    |
+| `PAUSED`     | Sobreescritura manual — pausa temporal, bloquea inscripciones y resultados                         |
+| `CANCELLED`  | Sobreescritura manual — cancelación irreversible, bloquea todas las operaciones                    |
 
 ### Respuesta `404 Not Found`
 
@@ -228,8 +228,8 @@ Actualiza un proceso electoral existente. Todos los campos son opcionales.
 ### Parámetros (Path)
 
 | Nombre | Tipo | Requerido |
-|--------|------|-----------|
-| `id` | UUID | Sí |
+| ------ | ---- | --------- |
+| `id`   | UUID | Sí        |
 
 ### Request Body (todos opcionales)
 
@@ -292,8 +292,8 @@ Elimina un proceso electoral. Solo se puede eliminar si no tiene equipos, inscri
 ### Parámetros (Path)
 
 | Nombre | Tipo | Requerido |
-|--------|------|-----------|
-| `id` | UUID | Sí |
+| ------ | ---- | --------- |
+| `id`   | UUID | Sí        |
 
 ### Respuesta `200 OK`
 
