@@ -6,6 +6,13 @@ Base path: `/api/private`
 
 ## Índice Rápido
 
+| Método | Endpoint | Auth | Rol |
+|--------|----------|------|-----|
+| GET | `/api/private/processes/{id}/results` | ❌ Público | — |
+| POST | `/api/private/records` | ➖ Exento | Semaphore Relayer |
+
+Detalle completo debajo.
+
 - [GET /api/private/processes/{id}/results — Resultados del proceso](#get-apiprivateprocessesidresults-resultados)
 - [POST /api/private/records — Ingresar voto](#post-apiprivaterecords-ingresar)
 
@@ -14,6 +21,8 @@ Base path: `/api/private`
 ## GET /api/private/processes/{id}/results <a name="get-apiprivateprocessesidresults-resultados"></a>
 
 Obtiene los resultados de un proceso electoral. Solo disponible cuando el proceso está en estado `CLOSED`.
+
+> **Auth**: ❌ Público — No requiere autenticación
 
 ### Parámetros (Path)
 
@@ -70,6 +79,8 @@ Obtiene los resultados de un proceso electoral. Solo disponible cuando el proces
 ## POST /api/private/records <a name="post-apiprivaterecords-ingresar"></a>
 
 Ingresa un voto validado desde el Semaphore Relayer. Endpoint **idempotente** — si ya existe un registro con el mismo `nullifier`, retorna el existente sin duplicar.
+
+> **Auth**: ➖ Exento — Acceso permitido sin autenticación (Semaphore Relayer, M2M futura)
 
 ### Request Body
 

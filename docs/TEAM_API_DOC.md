@@ -6,6 +6,16 @@ Base path: `/api/private`
 
 ## Índice Rápido
 
+| Método | Endpoint | Auth | Rol |
+|--------|----------|------|-----|
+| GET | `/api/private/processes/{processId}/teams` | ❌ Público | — |
+| GET | `/api/private/teams/{id}` | ❌ Público | — |
+| POST | `/api/private/processes/{processId}/teams` | ✅ Bearer JWT | `creator` |
+| PUT | `/api/private/teams/{id}` | ✅ Bearer JWT | `creator` |
+| DELETE | `/api/private/teams/{id}` | ✅ Bearer JWT | `creator` |
+
+Detalle completo debajo.
+
 - [GET /api/private/processes/{processId}/teams — Listar equipos](#get-apiprivateprocessesprocessidteams-listar)
 - [GET /api/private/teams/{id} — Obtener equipo](#get-apiprivateteamsid-obtener)
 - [POST /api/private/processes/{processId}/teams — Crear equipo](#post-apiprivateprocessesprocessidteams-crear)
@@ -17,6 +27,8 @@ Base path: `/api/private`
 ## GET /api/private/processes/{processId}/teams <a name="get-apiprivateprocessesprocessidteams-listar"></a>
 
 Lista todos los equipos de un proceso electoral.
+
+> **Auth**: ❌ Público — No requiere autenticación
 
 ### Parámetros (Path)
 
@@ -59,6 +71,8 @@ Lista todos los equipos de un proceso electoral.
 
 Obtiene un equipo por su ID.
 
+> **Auth**: ❌ Público — No requiere autenticación
+
 ### Parámetros (Path)
 
 | Nombre | Tipo | Requerido |
@@ -97,6 +111,8 @@ Obtiene un equipo por su ID.
 ## POST /api/private/processes/{processId}/teams <a name="post-apiprivateprocessesprocessidteams-crear"></a>
 
 Crea un nuevo equipo dentro de un proceso electoral.
+
+> **Auth**: ✅ Bearer JWT — Requiere rol `creator`
 
 ### Parámetros (Path)
 
@@ -159,6 +175,8 @@ Crea un nuevo equipo dentro de un proceso electoral.
 
 Actualiza el nombre y/o avatar de un equipo. Todos los campos son opcionales.
 
+> **Auth**: ✅ Bearer JWT — Requiere rol `creator`
+
 ### Parámetros (Path)
 
 | Nombre | Tipo | Requerido |
@@ -206,6 +224,8 @@ Actualiza el nombre y/o avatar de un equipo. Todos los campos son opcionales.
 ## DELETE /api/private/teams/{id} <a name="delete-apiprivateteamsid-eliminar"></a>
 
 Elimina un equipo por su ID.
+
+> **Auth**: ✅ Bearer JWT — Requiere rol `creator`
 
 ### Parámetros (Path)
 

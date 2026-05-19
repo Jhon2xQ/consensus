@@ -6,6 +6,17 @@ Base path: `/api/private/processes`
 
 ## Índice Rápido
 
+| Método | Endpoint | Auth | Rol |
+|--------|----------|------|-----|
+| GET | `/api/private/processes` | ❌ Público | — |
+| GET | `/api/private/processes/{id}` | ❌ Público | — |
+| GET | `/api/private/processes/{id}/state` | ❌ Público | — |
+| POST | `/api/private/processes` | ✅ Bearer JWT | `creator` |
+| PUT | `/api/private/processes/{id}` | ✅ Bearer JWT | `creator` |
+| DELETE | `/api/private/processes/{id}` | ✅ Bearer JWT | `creator` |
+
+Detalle completo debajo.
+
 - [GET /api/private/processes — Listar procesos](#get-apiprivateprocesses-listar)
 - [GET /api/private/processes/{id} — Obtener proceso](#get-apiprivateprocessesid-obtener)
 - [GET /api/private/processes/{id}/state — Estado actual](#get-apiprivateprocessesidstate-estado)
@@ -18,6 +29,8 @@ Base path: `/api/private/processes`
 ## GET /api/private/processes <a name="get-apiprivateprocesses-listar"></a>
 
 Lista todos los procesos electorales con paginación.
+
+> **Auth**: ❌ Público — No requiere autenticación
 
 ### Parámetros (Query)
 
@@ -63,6 +76,8 @@ Lista todos los procesos electorales con paginación.
 
 Obtiene un proceso electoral por su ID.
 
+> **Auth**: ❌ Público — No requiere autenticación
+
 ### Parámetros (Path)
 
 | Nombre | Tipo | Requerido |
@@ -107,6 +122,8 @@ Obtiene un proceso electoral por su ID.
 ## GET /api/private/processes/{id}/state <a name="get-apiprivateprocessesidstate-estado"></a>
 
 Obtiene el estado del proceso electoral. El estado se calcula en tiempo real basado en sus fechas, excepto PAUSED y CANCELLED que son locks manuales y se devuelven directamente.
+
+> **Auth**: ❌ Público — No requiere autenticación
 
 ### Parámetros (Path)
 
@@ -155,6 +172,8 @@ Obtiene el estado del proceso electoral. El estado se calcula en tiempo real bas
 ## POST /api/private/processes <a name="post-apiprivateprocesses-crear"></a>
 
 Crea un nuevo proceso electoral.
+
+> **Auth**: ✅ Bearer JWT — Requiere rol `creator`
 
 ### Request Body
 
@@ -225,6 +244,8 @@ Crea un nuevo proceso electoral.
 
 Actualiza un proceso electoral existente. Todos los campos son opcionales.
 
+> **Auth**: ✅ Bearer JWT — Requiere rol `creator`
+
 ### Parámetros (Path)
 
 | Nombre | Tipo | Requerido |
@@ -288,6 +309,8 @@ Actualiza un proceso electoral existente. Todos los campos son opcionales.
 ## DELETE /api/private/processes/{id} <a name="delete-apiprivateprocessesid-eliminar"></a>
 
 Elimina un proceso electoral. Solo se puede eliminar si no tiene equipos, inscripciones ni registros de voto asociados.
+
+> **Auth**: ✅ Bearer JWT — Requiere rol `creator`
 
 ### Parámetros (Path)
 

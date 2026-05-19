@@ -6,30 +6,37 @@ spring:
     virtual:
       enabled: true
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER}
+          jwk-set-uri: ${JWKS_URI}
+
   datasource:
-    url: jdbc:h2:mem:consensus;DB_CLOSE_DELAY=-1
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    url: ${DB_URL:jdbc:h2:mem:consensus;DB_CLOSE_DELAY=-1}
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:}
+    driver-class-name: ${DB_DRIVER:org.h2.Driver}
 
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: update
+      ddl-auto: ${DDL_AUTO:update}
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.H2Dialect
+        dialect: ${HIBERNATE_DIALECT:org.hibernate.dialect.H2Dialect}
         format_sql: true
-    show-sql: true
+    show-sql: ${SHOW_SQL:true}
 
   jackson:
     time-zone: UTC
     default-property-inclusion: non_null
 
 server:
-  port: 8080
+  port: ${PORT:8080}
 
 logging:
   level:
-    com.carmenio.consensus: DEBUG
-    org.hibernate.SQL: DEBUG
+    com.carmenio.consensus: ${LOG_LEVEL:DEBUG}
+    org.hibernate.SQL: ${HIBERNATE_SQL:DEBUG}

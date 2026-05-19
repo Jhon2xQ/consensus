@@ -8,10 +8,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("ExceptionHandlerMiddleware")
 class ExceptionHandlerMiddlewareTest {
@@ -86,5 +89,31 @@ class ExceptionHandlerMiddlewareTest {
         assertNotNull(response.getBody());
         assertFalse(response.getBody().isSuccess());
         assertEquals("Internal server error", response.getBody().getMessage());
+    }
+
+    @Test
+    @DisplayName("should return 401 when AuthenticationException is thrown")
+    void shouldReturn401WhenAuthenticationException() {
+        var exception = new AuthenticationException("Bad credentials") {};
+
+        ResponseEntity<ApiResponse<?>> response = handler.handleAuthentication(exception);
+
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertFalse(response.getBody().isSuccess());
+        assertEquals("Full authentication is required to access this resource", response.getBody().getMessage());
+    }
+
+    @Test
+    @DisplayName("should return 403 when AccessDeniedException is thrown")
+    void shouldReturn403WhenAccessDeniedException() {
+        var exception = new AccessDeniedException("Access is denied");
+
+        ResponseEntity<ApiResponse<?>> response = handler.handleAccessDenied(exception);
+
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertFalse(response.getBody().isSuccess());
+        assertEquals("Access denied: insufficient permissions", response.getBody().getMessage());
     }
 }

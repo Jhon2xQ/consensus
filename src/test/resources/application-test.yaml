@@ -1,4 +1,13 @@
+JWKS_URI: https://test-tenant.logto.app/oidc/jwks
+JWT_ISSUER: https://test-tenant.logto.app/oidc
+
 spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: https://test-tenant.logto.app/oidc/jwks
+
   jpa:
     hibernate:
       ddl-auto: create-drop

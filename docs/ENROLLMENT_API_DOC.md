@@ -6,6 +6,14 @@ Base path: `/api/private`
 
 ## Índice Rápido
 
+| Método | Endpoint | Auth | Rol |
+|--------|----------|------|-----|
+| GET | `/api/private/processes/{processId}/enrollments` | ✅ Bearer JWT | `user` |
+| GET | `/api/private/enrollments/{id}` | ✅ Bearer JWT | `user` |
+| POST | `/api/private/processes/{processId}/enrollments` | ✅ Bearer JWT | `user` |
+
+Detalle completo debajo.
+
 - [GET /api/private/processes/{processId}/enrollments — Listar inscripciones](#get-apiprivateprocessesprocessidenrollments-listar)
 - [GET /api/private/enrollments/{id} — Obtener inscripción](#get-apiprivateenrollmentsid-obtener)
 - [POST /api/private/processes/{processId}/enrollments — Crear inscripción](#post-apiprivateprocessesprocessidenrollments-crear)
@@ -15,6 +23,8 @@ Base path: `/api/private`
 ## GET /api/private/processes/{processId}/enrollments <a name="get-apiprivateprocessesprocessidenrollments-listar"></a>
 
 Lista todas las inscripciones de un proceso electoral.
+
+> **Auth**: ✅ Bearer JWT — Requiere rol `user`
 
 ### Parámetros (Path)
 
@@ -58,6 +68,8 @@ Lista todas las inscripciones de un proceso electoral.
 
 Obtiene una inscripción por su ID.
 
+> **Auth**: ✅ Bearer JWT — Requiere rol `user`
+
 ### Parámetros (Path)
 
 | Nombre | Tipo | Requerido |
@@ -99,6 +111,8 @@ Obtiene una inscripción por su ID.
 Inscribe un votante en un proceso electoral mediante su commitment de Semaphore.
 
 Solo se permite inscribir cuando el proceso está en estado `NONE` o `COMMITMENT`.
+
+> **Auth**: ✅ Bearer JWT — Requiere rol `user`
 
 ### Parámetros (Path)
 

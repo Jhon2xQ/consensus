@@ -34,3 +34,8 @@ build/
 
 ### Agent Tools ###
 .atl/
+
+### Environment ###
+.env
+.env.local
+.env.*.local

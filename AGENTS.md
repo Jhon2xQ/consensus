@@ -11,7 +11,7 @@
 - **Propósito**: Crear procesos electorales, inscribir votantes mediante commitments, y calcular resultados a partir de votos validados en blockchain.
 - **Stack**: Spring Boot 4.0.6 + Java 25 + PostgreSQL + JPA (Hibernate)
 - **Arquitectura**: Clean Architecture / Hexagonal
-- **Autenticación**: Sin auth por ahora (feature futura con Logto)
+- **Autenticación**: JWT vía Logto (OAuth2 Resource Server) + RBAC
 - **Estado**: En desarrollo activo
 
 ---
@@ -326,7 +326,73 @@ Cuando crees o actualices documentación de endpoints, seguí estas reglas:
 
 ---
 
-## 10. Integración Semaphore
+## 10. Autenticación y Autorización
+
+La API utiliza **Logto** como Identity Provider con OAuth2 Resource Server + JWT.
+
+### 10.1 Flujo de Autenticación
+
+1. El cliente obtiene un JWT de Logto (login desde frontend)
+2. Envía el token en el header `Authorization: Bearer <token>`
+3. Spring Security valida:
+   - Firma del JWT contra la JWKS de Logto (RS256)
+   - Expiración del token
+4. Extrae los roles del claim `roles` del JWT
+5. Convierte cada rol a `ROLE_<rolename>` (convención Spring Security)
+6. Las reglas del `SecurityFilterChain` determinan el acceso
+
+### 10.2 Rutas y Roles
+
+| Patrón | Método | Acceso | Rol Requerido |
+|--------|--------|--------|---------------|
+| `/api/private/processes/**` | GET | ❌ Público | — |
+| `/api/private/teams/**` | GET | ❌ Público | — |
+| `/api/private/processes/{id}/results` | GET | ❌ Público | — |
+| `/api/private/records` | POST | ➖ Exento | Semaphore Relayer |
+| `/api/private/processes/**` | POST, PUT, DELETE | ✅ Protegido | `creator` |
+| `/api/private/teams/**` | POST, PUT, DELETE | ✅ Protegido | `creator` |
+| `/api/private/processes/{processId}/enrollments` | GET, POST | ✅ Protegido | `user` |
+| `/api/private/enrollments/{id}` | GET | ✅ Protegido | `user` |
+
+### 10.3 Configuración
+
+```yaml
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER}
+          jwk-set-uri: ${JWKS_URI}
+```
+
+Variables de entorno requeridas:
+- `JWT_ISSUER` — URL del issuer de Logto
+- `JWKS_URI` — URL del JWKS endpoint de Logto
+
+### 10.4 Clases de Seguridad
+
+| Clase | Ubicación | Propósito |
+|-------|-----------|-----------|
+| `SecurityConfig` | `common/config/` | SecurityFilterChain con reglas de ruteo, converter de roles JWT, OAuth2 resource server |
+| `JwtDecoderConfig` | `common/config/` | Bean JwtDecoder con Nimbus + JWKS URI |
+| `RbacValidator` | `common/security/` | Utilidad para verificar roles desde SecurityContextHolder |
+| `ExceptionHandlerMiddleware` | `presentation/middleware/` | Handlers para AuthenticationException → 401 y AccessDeniedException → 403 |
+
+### 10.5 Roles (Logto → Spring Security)
+
+Logto envía roles en el claim `roles` del JWT como un array de strings:
+```json
+{
+  "roles": ["creator", "user"]
+}
+```
+
+El `JwtAuthenticationConverter` en `SecurityConfig` mapea cada rol a `ROLE_<rolename>`, permitiendo el uso de `hasRole("creator")` y `hasRole("user")` en las reglas de autorización.
+
+---
+
+## 11. Integración Semaphore
 
 El Semaphore Relayer (microservicio Node/Bun) escucha eventos `ProofValidated` on-chain y consume `POST /api/private/records` para persistir votos.
 
@@ -345,20 +411,22 @@ El Semaphore Relayer (microservicio Node/Bun) escucha eventos `ProofValidated` o
 
 ---
 
-## 11. Código de Estado HTTP
+## 12. Código de Estado HTTP
 
 | Código | Uso                                 |
 | ------ | ----------------------------------- |
 | 200    | Operación exitosa                   |
 | 201    | Recurso creado                      |
 | 400    | Error de validación de negocio      |
+| 401    | No autenticado (token faltante o inválido) |
+| 403    | Acceso denegado (rol insuficiente)  |
 | 404    | Recurso no encontrado               |
 | 409    | Conflicto (duplicado, dependencias) |
 | 500    | Error interno del servidor          |
 
 ---
 
-## 12. Reglas para el Agente de IA
+## 13. Reglas para el Agente de IA
 
 Cuando generes código para este proyecto:
 
