@@ -8,20 +8,25 @@ import java.util.UUID;
 /**
  * JPA entity representing a voter enrollment in an electoral process.
  * <p>
- * Each enrollment links a voter (by userId and Semaphore commitment)
- * to a specific electoral process. The {@code hasVoted} flag is set
- * externally when a validated vote record is received from the
- * Semaphore Relayer.
+ * Two-phase enrollment flow:
+ * <ol>
+ *   <li><b>Creator</b> registers a voter email — creates an Enrollment with
+ *       {@code email} populated and {@code userId}/@{@code commitment} null.</li>
+ *   <li><b>User</b> claims the enrollment — JWT email matches, sets
+ *       {@code userId} (from JWT {@code sub}) and {@code commitment}.</li>
+ * </ol>
+ * The {@code hasVoted} flag is set externally when a validated vote
+ * record is received from the Semaphore Relayer.
  * <p>
  * Constraint pairs enforced at the database level:
  * <ul>
- *   <li>{@code UNIQUE(electoralProcessId, userId)} — one enrollment per voter per process</li>
+ *   <li>{@code UNIQUE(electoralProcessId, email)} — no duplicate emails per process</li>
  *   <li>{@code UNIQUE(electoralProcessId, commitment)} — no duplicate commitments per process</li>
  * </ul>
  */
 @Entity
 @Table(name = "enrollments", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"electoralProcessId", "userId"}),
+        @UniqueConstraint(columnNames = {"electoralProcessId", "email"}),
         @UniqueConstraint(columnNames = {"electoralProcessId", "commitment"})
 })
 @Getter
@@ -39,9 +44,12 @@ public class Enrollment {
     private UUID electoralProcessId;
 
     @Column(nullable = false)
+    private String email;
+
+    @Column(nullable = true)
     private String userId;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String commitment;
 
     @Builder.Default

@@ -29,4 +29,22 @@ public class EnrollmentException extends DomainException {
     public static EnrollmentException duplicateCommitment() {
         return new EnrollmentException("A commitment with this value already exists in the process", 409);
     }
+
+    public static EnrollmentException emailAlreadyRegistered(UUID processId, String email) {
+        return new EnrollmentException(
+                "Email already registered in this process: " + processId + " - " + email, 409);
+    }
+
+    public static EnrollmentException emailNotFound(UUID processId, String email) {
+        return new EnrollmentException(
+                "No enrollment found for this email in this process: " + processId + " - " + email, 404);
+    }
+
+    public static EnrollmentException emailMismatch() {
+        return new EnrollmentException("Email does not match the enrollment email", 404);
+    }
+
+    public static EnrollmentException missingJwtClaims() {
+        return new EnrollmentException("Missing required claims in JWT", 401);
+    }
 }
