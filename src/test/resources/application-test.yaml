@@ -5,6 +5,13 @@ AUDIENCE: https://api.consensus.test
 CORS_ORIGINS: http://localhost:5173
 
 spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://test-tenant.logto.app/oidc
+          jwk-set-uri: https://test-tenant.logto.app/oidc/jwks
+          audiences: https://api.consensus.test
   jpa:
     hibernate:
       ddl-auto: create-drop
