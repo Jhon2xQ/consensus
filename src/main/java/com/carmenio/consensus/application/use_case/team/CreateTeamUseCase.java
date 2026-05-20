@@ -9,6 +9,7 @@ import com.carmenio.consensus.domain.repository.TeamRepository;
 import com.carmenio.consensus.infrastructure.mapper.TeamMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Use case for creating a new team within an electoral process.
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
+@Transactional
 public class CreateTeamUseCase {
 
     private final TeamRepository teamRepository;

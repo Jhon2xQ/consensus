@@ -1,6 +1,5 @@
 package com.carmenio.consensus.application.dto.electoral_process;
 
-import com.carmenio.consensus.common.constant.ProcessStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -20,16 +19,6 @@ class UpdateElectoralProcessRequestTest {
                 .build();
 
         assertEquals("Updated description", request.getDescription());
-    }
-
-    @Test
-    @DisplayName("should accept estatus for manual override")
-    void shouldAcceptEstatusForManualOverride() {
-        var request = UpdateElectoralProcessRequest.builder()
-                .estatus(ProcessStatus.PAUSED)
-                .build();
-
-        assertEquals(ProcessStatus.PAUSED, request.getEstatus());
     }
 
     @Test

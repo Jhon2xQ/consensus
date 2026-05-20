@@ -17,8 +17,8 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Tests for {@link ProcessStateCalculator}.
  * <p>
- * Verifies all 7 state transitions including boundary edge cases,
- * lock states (PAUSED/CANCELLED), and the new transitionState() method.
+ * Verifies all state transitions including boundary edge cases
+ * and the transitionState() method.
  */
 class ProcessStateCalculatorTest {
 
@@ -126,31 +126,6 @@ class ProcessStateCalculatorTest {
     }
 
     @Test
-    @DisplayName("should return PAUSED when estatus is PAUSED (lock override)")
-    void shouldReturnPausedWhenEstatusIsPaused() {
-        var process = createDefaultProcess();
-        process.setEstatus(ProcessStatus.PAUSED);
-
-        // Even though now is during COMMITMENT window, PAUSED is a lock
-        var now = BASE.plus(5, ChronoUnit.DAYS);
-        var result = ProcessStateCalculator.computeState(process, now);
-
-        assertEquals(ProcessStatus.PAUSED, result);
-    }
-
-    @Test
-    @DisplayName("should return CANCELLED when estatus is CANCELLED (lock override)")
-    void shouldReturnCancelledWhenEstatusIsCancelled() {
-        var process = createDefaultProcess();
-        process.setEstatus(ProcessStatus.CANCELLED);
-
-        var now = BASE.plus(5, ChronoUnit.DAYS);
-        var result = ProcessStateCalculator.computeState(process, now);
-
-        assertEquals(ProcessStatus.CANCELLED, result);
-    }
-
-    @Test
     @DisplayName("should compute real-time state when estatus is NONE (default)")
     void shouldComputeRealTimeStateWhenEstatusIsNone() {
         var process = createDefaultProcess();
@@ -224,30 +199,4 @@ class ProcessStateCalculatorTest {
                 "should not change when already matches computed");
     }
 
-    @Test
-    @DisplayName("transitionState should NOT mutate when estatus is PAUSED (lock)")
-    void transitionStateShouldNotMutateWhenPaused() {
-        var process = createDefaultProcess();
-        process.setEstatus(ProcessStatus.PAUSED);
-
-        // Now is during COMMITMENT, but PAUSED is a lock
-        var now = BASE.plus(5, ChronoUnit.DAYS);
-        ProcessStateCalculator.transitionState(process, now);
-
-        assertEquals(ProcessStatus.PAUSED, process.getEstatus(),
-                "PAUSED should block auto-transition");
-    }
-
-    @Test
-    @DisplayName("transitionState should NOT mutate when estatus is CANCELLED (lock)")
-    void transitionStateShouldNotMutateWhenCancelled() {
-        var process = createDefaultProcess();
-        process.setEstatus(ProcessStatus.CANCELLED);
-
-        var now = BASE.plus(5, ChronoUnit.DAYS);
-        ProcessStateCalculator.transitionState(process, now);
-
-        assertEquals(ProcessStatus.CANCELLED, process.getEstatus(),
-                "CANCELLED should block auto-transition");
-    }
 }

@@ -7,6 +7,7 @@ import com.carmenio.consensus.domain.repository.EnrollmentRepository;
 import com.carmenio.consensus.infrastructure.mapper.EnrollmentMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -18,6 +19,7 @@ import java.util.UUID;
  */
 @Component
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ListEnrollmentsByProcessUseCase {
 
     private final EnrollmentRepository enrollmentRepository;

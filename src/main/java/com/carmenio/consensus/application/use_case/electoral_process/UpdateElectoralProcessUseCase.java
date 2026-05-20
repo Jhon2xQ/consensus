@@ -8,6 +8,7 @@ import com.carmenio.consensus.domain.repository.ElectoralProcessRepository;
 import com.carmenio.consensus.infrastructure.mapper.ElectoralProcessMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -20,6 +21,7 @@ import java.util.UUID;
  */
 @Component
 @RequiredArgsConstructor
+@Transactional
 public class UpdateElectoralProcessUseCase {
 
     private final ElectoralProcessRepository repository;
@@ -45,7 +47,7 @@ public class UpdateElectoralProcessUseCase {
 
         mapper.updateEntity(entity, request);
 
-        // Auto-transition estatus based on current dates (respects PAUSED/CANCELLED locks)
+        // Auto-transition estatus based on current dates
         ProcessStateCalculator.transitionState(entity, Instant.now());
         var saved = repository.save(entity);
 

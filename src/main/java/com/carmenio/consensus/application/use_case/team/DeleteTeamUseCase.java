@@ -4,6 +4,7 @@ import com.carmenio.consensus.domain.exception.TeamException;
 import com.carmenio.consensus.domain.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -12,6 +13,7 @@ import java.util.UUID;
  */
 @Component
 @RequiredArgsConstructor
+@Transactional
 public class DeleteTeamUseCase {
 
     private final TeamRepository teamRepository;

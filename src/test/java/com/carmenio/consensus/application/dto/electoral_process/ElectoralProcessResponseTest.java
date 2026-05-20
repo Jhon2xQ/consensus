@@ -23,7 +23,7 @@ class ElectoralProcessResponseTest {
                 .name("Test Process")
                 .scope("test-scope")
                 .description("A test process")
-                .estatus(ProcessStatus.PAUSED)
+                .estatus(ProcessStatus.CLOSED)
                 .commitmentStart(now)
                 .commitmentEnd(now.plusSeconds(3600))
                 .votingStart(now.plusSeconds(7200))
@@ -33,7 +33,7 @@ class ElectoralProcessResponseTest {
 
         assertAll("response with optional fields",
                 () -> assertEquals("A test process", response.getDescription()),
-                () -> assertEquals(ProcessStatus.PAUSED, response.getEstatus())
+                () -> assertEquals(ProcessStatus.CLOSED, response.getEstatus())
         );
     }
 

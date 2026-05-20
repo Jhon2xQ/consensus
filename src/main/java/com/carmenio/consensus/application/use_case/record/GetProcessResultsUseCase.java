@@ -10,6 +10,7 @@ import com.carmenio.consensus.domain.repository.TeamRepository;
 import com.carmenio.consensus.domain.repository.VoteRecordRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -22,6 +23,7 @@ import java.util.UUID;
  */
 @Component
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class GetProcessResultsUseCase {
 
     private final ElectoralProcessRepository electoralProcessRepository;

@@ -9,6 +9,7 @@ import com.carmenio.consensus.domain.repository.VoteRecordRepository;
 import com.carmenio.consensus.infrastructure.mapper.VoteRecordMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Use case for creating a new vote record ingested from the Semaphore Relayer.
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
+@Transactional
 public class CreateVoteRecordUseCase {
 
     private final ElectoralProcessRepository electoralProcessRepository;

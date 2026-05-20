@@ -11,6 +11,7 @@ import com.carmenio.consensus.domain.repository.EnrollmentRepository;
 import com.carmenio.consensus.infrastructure.mapper.EnrollmentMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
@@ -23,6 +24,7 @@ import java.time.Instant;
  */
 @Component
 @RequiredArgsConstructor
+@Transactional
 public class CreateEnrollmentUseCase {
 
     private final EnrollmentRepository enrollmentRepository;

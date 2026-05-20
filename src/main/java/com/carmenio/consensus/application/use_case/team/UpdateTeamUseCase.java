@@ -6,6 +6,7 @@ import com.carmenio.consensus.domain.repository.TeamRepository;
 import com.carmenio.consensus.infrastructure.mapper.TeamMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -17,6 +18,7 @@ import java.util.UUID;
  */
 @Component
 @RequiredArgsConstructor
+@Transactional
 public class UpdateTeamUseCase {
 
     private final TeamRepository teamRepository;

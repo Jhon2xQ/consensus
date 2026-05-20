@@ -115,52 +115,6 @@ class ElectoralProcessMapperTest {
     }
 
     @Test
-    @DisplayName("should update estatus when explicitly provided")
-    void shouldUpdateEstatusWhenExplicitlyProvided() {
-        var original = ElectoralProcess.builder()
-                .id(UUID.randomUUID())
-                .name("Process")
-                .scope("scope")
-                .commitmentStart(Instant.parse("2026-01-01T00:00:00Z"))
-                .commitmentEnd(Instant.parse("2026-01-10T00:00:00Z"))
-                .votingStart(Instant.parse("2026-02-01T00:00:00Z"))
-                .votingEnd(Instant.parse("2026-02-10T00:00:00Z"))
-                .results(Instant.parse("2026-03-01T00:00:00Z"))
-                .build();
-
-        var update = UpdateElectoralProcessRequest.builder()
-                .estatus(ProcessStatus.PAUSED)
-                .build();
-
-        mapper.updateEntity(original, update);
-
-        assertEquals(ProcessStatus.PAUSED, original.getEstatus());
-    }
-
-    @Test
-    @DisplayName("should update estatus when explicitly provided to CANCELLED")
-    void shouldUpdateEstatusToCancelled() {
-        var original = ElectoralProcess.builder()
-                .id(UUID.randomUUID())
-                .name("Process")
-                .scope("scope")
-                .commitmentStart(Instant.parse("2026-01-01T00:00:00Z"))
-                .commitmentEnd(Instant.parse("2026-01-10T00:00:00Z"))
-                .votingStart(Instant.parse("2026-02-01T00:00:00Z"))
-                .votingEnd(Instant.parse("2026-02-10T00:00:00Z"))
-                .results(Instant.parse("2026-03-01T00:00:00Z"))
-                .build();
-
-        var update = UpdateElectoralProcessRequest.builder()
-                .estatus(ProcessStatus.CANCELLED)
-                .build();
-
-        mapper.updateEntity(original, update);
-
-        assertEquals(ProcessStatus.CANCELLED, original.getEstatus());
-    }
-
-    @Test
     @DisplayName("should not change entity when update request has all null fields")
     void shouldNotChangeEntityWhenUpdateRequestHasAllNullFields() {
         var original = ElectoralProcess.builder()
@@ -262,27 +216,5 @@ class ElectoralProcessMapperTest {
                 () -> assertEquals(now.plusSeconds(10800), response.getVotingEnd()),
                 () -> assertEquals(now.plusSeconds(14400), response.getResults())
         );
-    }
-
-    @Test
-    @DisplayName("should map entity to response with PAUSED computed status")
-    void shouldMapEntityToResponseWithPausedStatus() {
-        var id = UUID.randomUUID();
-        var now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
-        var entity = ElectoralProcess.builder()
-                .id(id)
-                .name("Test Process")
-                .scope("test-scope")
-                .commitmentStart(now)
-                .commitmentEnd(now.plusSeconds(3600))
-                .votingStart(now.plusSeconds(7200))
-                .votingEnd(now.plusSeconds(10800))
-                .results(now.plusSeconds(14400))
-                .build();
-
-        var response = mapper.toResponse(entity, ProcessStatus.PAUSED);
-
-        assertEquals(ProcessStatus.PAUSED, response.getEstatus(),
-                "response should reflect PAUSED when computed status is PAUSED");
     }
 }

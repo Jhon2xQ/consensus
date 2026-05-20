@@ -7,6 +7,7 @@ import com.carmenio.consensus.domain.repository.ElectoralProcessRepository;
 import com.carmenio.consensus.infrastructure.mapper.ElectoralProcessMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -19,6 +20,7 @@ import java.util.UUID;
  */
 @Component
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class FindElectoralProcessByIdUseCase {
 
     private final ElectoralProcessRepository repository;

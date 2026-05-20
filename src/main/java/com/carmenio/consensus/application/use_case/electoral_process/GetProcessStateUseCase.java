@@ -6,6 +6,7 @@ import com.carmenio.consensus.domain.exception.ElectoralProcessException;
 import com.carmenio.consensus.domain.repository.ElectoralProcessRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -17,6 +18,7 @@ import java.util.UUID;
  */
 @Component
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class GetProcessStateUseCase {
 
     private final ElectoralProcessRepository repository;

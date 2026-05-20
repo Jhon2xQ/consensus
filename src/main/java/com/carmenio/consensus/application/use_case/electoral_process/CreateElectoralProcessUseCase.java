@@ -8,6 +8,7 @@ import com.carmenio.consensus.domain.repository.ElectoralProcessRepository;
 import com.carmenio.consensus.infrastructure.mapper.ElectoralProcessMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
@@ -19,6 +20,7 @@ import java.time.Instant;
  */
 @Component
 @RequiredArgsConstructor
+@Transactional
 public class CreateElectoralProcessUseCase {
 
     private final ElectoralProcessRepository repository;

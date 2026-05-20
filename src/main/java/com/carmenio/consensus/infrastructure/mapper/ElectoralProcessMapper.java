@@ -38,10 +38,6 @@ public class ElectoralProcessMapper {
 
     /**
      * Applies non-null fields from an update request to an existing entity.
-     * <p>
-     * If {@code estatus} is non-null, it is applied as a manual override
-     * (typically PAUSED or CANCELLED). The use case will call
-     * {@code transitionState()} afterwards for date-based auto-transition.
      */
     public void updateEntity(ElectoralProcess entity, UpdateElectoralProcessRequest request) {
         if (request.getName() != null) {
@@ -64,9 +60,6 @@ public class ElectoralProcessMapper {
         }
         if (request.getResults() != null) {
             entity.setResults(request.getResults());
-        }
-        if (request.getEstatus() != null) {
-            entity.setEstatus(request.getEstatus());
         }
     }
 

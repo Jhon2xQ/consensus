@@ -23,7 +23,7 @@ class ElectoralProcessTest {
                 .name("Test Process")
                 .scope("test-scope")
                 .description("A test electoral process")
-                .estatus(ProcessStatus.PAUSED)
+                .estatus(ProcessStatus.VOTING)
                 .commitmentStart(now)
                 .commitmentEnd(now.plusSeconds(3600))
                 .votingStart(now.plusSeconds(7200))
@@ -34,7 +34,7 @@ class ElectoralProcessTest {
         assertAll("entity fields",
                 () -> assertEquals("A test electoral process", process.getDescription(),
                         "description should be stored and retrieved"),
-                () -> assertEquals(ProcessStatus.PAUSED, process.getEstatus(),
+                () -> assertEquals(ProcessStatus.VOTING, process.getEstatus(),
                         "estatus should be stored and retrieved")
         );
     }

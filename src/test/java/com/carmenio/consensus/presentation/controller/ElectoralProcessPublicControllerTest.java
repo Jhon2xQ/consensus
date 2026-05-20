@@ -115,38 +115,4 @@ class ElectoralProcessPublicControllerTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.state").value("COMMITMENT"));
     }
-
-    @Test
-    @DisplayName("GET /public/processes/{id}/state should return PAUSED when process is paused")
-    void shouldReturnPausedState() throws Exception {
-        var id = UUID.randomUUID();
-        var stateResponse = ProcessStateResponse.builder()
-                .processId(id)
-                .state(ProcessStatus.PAUSED)
-                .build();
-
-        when(getStateUseCase.execute(eq(id), any())).thenReturn(stateResponse);
-
-        mockMvc.perform(get("/public/processes/{id}/state", id))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.state").value("PAUSED"));
-    }
-
-    @Test
-    @DisplayName("GET /public/processes/{id}/state should return CANCELLED when process is cancelled")
-    void shouldReturnCancelledState() throws Exception {
-        var id = UUID.randomUUID();
-        var stateResponse = ProcessStateResponse.builder()
-                .processId(id)
-                .state(ProcessStatus.CANCELLED)
-                .build();
-
-        when(getStateUseCase.execute(eq(id), any())).thenReturn(stateResponse);
-
-        mockMvc.perform(get("/public/processes/{id}/state", id))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.state").value("CANCELLED"));
-    }
 }

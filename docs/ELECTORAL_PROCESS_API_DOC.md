@@ -96,7 +96,7 @@ Obtiene un proceso electoral por su ID.
     "name": "string",
     "scope": "string",
     "description": "string | null",
-    "estatus": "NONE | COMMITMENT | VOTING | CLOSED | PAUSED | CANCELLED",
+    "estatus": "NONE | COMMITMENT | VOTING | CLOSED",
     "commitmentStart": "instant (ISO-8601)",
     "commitmentEnd": "instant (ISO-8601)",
     "votingStart": "instant (ISO-8601)",
@@ -122,7 +122,7 @@ Obtiene un proceso electoral por su ID.
 
 ## GET /api/public/processes/{id}/state <a name="get-apipublicprocessesidstate-estado"></a>
 
-Obtiene el estado del proceso electoral. El estado se calcula en tiempo real basado en sus fechas, excepto PAUSED y CANCELLED que son locks manuales y se devuelven directamente.
+Obtiene el estado del proceso electoral. El estado se calcula en tiempo real basado en sus fechas.
 
 > **Auth**: ❌ Público — No requiere autenticación
 
@@ -140,7 +140,7 @@ Obtiene el estado del proceso electoral. El estado se calcula en tiempo real bas
   "message": "Operation successful",
   "data": {
     "processId": "uuid",
-    "state": "NONE | COMMITMENT | VOTING | CLOSED | PAUSED | CANCELLED"
+    "state": "NONE | COMMITMENT | VOTING | CLOSED"
   },
   "timestamp": 1234567890
 }
@@ -154,8 +154,6 @@ Obtiene el estado del proceso electoral. El estado se calcula en tiempo real bas
 | `COMMITMENT` | `commitmentStart ≤ now ≤ commitmentEnd`                                                            |
 | `VOTING`     | `votingStart ≤ now ≤ votingEnd`                                                                    |
 | `CLOSED`     | `results ≤ now`                                                                                    |
-| `PAUSED`     | Sobreescritura manual — pausa temporal, bloquea inscripciones y resultados                         |
-| `CANCELLED`  | Sobreescritura manual — cancelación irreversible, bloquea todas las operaciones                    |
 
 ### Respuesta `404 Not Found`
 
@@ -204,7 +202,7 @@ Crea un nuevo proceso electoral.
     "name": "string",
     "scope": "string",
     "description": "string | null",
-    "estatus": "NONE | COMMITMENT | VOTING | CLOSED | PAUSED | CANCELLED",
+    "estatus": "NONE | COMMITMENT | VOTING | CLOSED",
     "commitmentStart": "instant (ISO-8601)",
     "commitmentEnd": "instant (ISO-8601)",
     "votingStart": "instant (ISO-8601)",
@@ -259,7 +257,6 @@ Actualiza un proceso electoral existente. Todos los campos son opcionales.
 {
   "name": "string (opcional)",
   "description": "string (opcional)",
-  "estatus": "PAUSED | CANCELLED (opcional)",
   "commitmentStart": "instant (ISO-8601, opcional)",
   "commitmentEnd": "instant (ISO-8601, opcional)",
   "votingStart": "instant (ISO-8601, opcional)",
@@ -268,9 +265,7 @@ Actualiza un proceso electoral existente. Todos los campos son opcionales.
 }
 ```
 
-> **Nota sobre `estatus`**: Solo acepta `PAUSED` o `CANCELLED` como override manual.
-> NONE, COMMITMENT, VOTING y CLOSED son gestionados automáticamente por la máquina de estados.
-> Si no se incluye el campo, la máquina de estados transiciona automáticamente según las fechas.
+> El `estatus` es gestionado automáticamente por la máquina de estados según las fechas del proceso.
 
 ### Respuesta `200 OK`
 
@@ -283,7 +278,7 @@ Actualiza un proceso electoral existente. Todos los campos son opcionales.
     "name": "string",
     "scope": "string",
     "description": "string | null",
-    "estatus": "NONE | COMMITMENT | VOTING | CLOSED | PAUSED | CANCELLED",
+    "estatus": "NONE | COMMITMENT | VOTING | CLOSED",
     "commitmentStart": "instant (ISO-8601)",
     "commitmentEnd": "instant (ISO-8601)",
     "votingStart": "instant (ISO-8601)",
