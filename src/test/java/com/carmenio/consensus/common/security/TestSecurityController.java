@@ -60,7 +60,7 @@ public class TestSecurityController {
         return ResponseEntity.ok(ApiResponse.success("ok"));
     }
 
-    // ── Creator-only endpoints ──
+    // ── Consensus-creator-only endpoints ──
 
     @PostMapping("/private/processes")
     public ResponseEntity<ApiResponse<String>> createProcess() {
@@ -92,7 +92,7 @@ public class TestSecurityController {
         return ResponseEntity.ok(ApiResponse.success("ok"));
     }
 
-    // ── User-only endpoints ──
+    // ── Consensus-user and consensus-creator endpoints ──
 
     @PostMapping("/private/processes/{processId}/enrollments")
     public ResponseEntity<ApiResponse<String>> createEnrollment(@PathVariable UUID processId) {
@@ -111,6 +111,11 @@ public class TestSecurityController {
 
     @GetMapping("/private/enrollments/{id}")
     public ResponseEntity<ApiResponse<String>> getEnrollment(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.success("ok"));
+    }
+
+    @DeleteMapping("/private/enrollments/{id}")
+    public ResponseEntity<ApiResponse<String>> deleteEnrollment(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.success("ok"));
     }
 }

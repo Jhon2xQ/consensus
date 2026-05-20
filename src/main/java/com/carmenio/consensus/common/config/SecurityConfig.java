@@ -33,9 +33,11 @@ import java.util.List;
  * <h3>Route matrix</h3>
  * <ul>
  *   <li>{@code /public/**} — open access (GET processes, teams, results; POST records)</li>
- *   <li>{@code /private/processes/**} POST, PUT, DELETE — {@code creator} role</li>
- *   <li>{@code /private/teams/**} POST, PUT, DELETE — {@code creator} role</li>
- *   <li>{@code /private/**} enrollment endpoints — {@code user} role</li>
+ *   <li>{@code /private/processes/**} POST, PUT, DELETE — {@code consensus-creator} role</li>
+ *   <li>{@code /private/teams/**} POST, PUT, DELETE — {@code consensus-creator} role</li>
+ *   <li>{@code /private/**} enrollment GET endpoints — authenticated</li>
+ *   <li>{@code /private/**} enrollment POST, DELETE endpoints — {@code consensus-creator} role</li>
+ *   <li>{@code /private/**} enrollment PUT endpoint — {@code consensus-user} role</li>
  *   <li>Fallback — authenticated</li>
  * </ul>
  */
@@ -74,17 +76,18 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 // ── Enrollment endpoints (most specific first) ──
-                .requestMatchers(HttpMethod.GET, "/private/processes/*/enrollments/**").hasRole("user")
-                .requestMatchers(HttpMethod.PUT, "/private/enrollments/{id}/commitment").hasRole("user")
-                .requestMatchers(HttpMethod.GET, "/private/enrollments/{id}").hasRole("user")
-                .requestMatchers(HttpMethod.POST, "/private/processes/*/enrollments/**").hasRole("creator")
+                .requestMatchers(HttpMethod.GET, "/private/processes/*/enrollments/**").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/private/enrollments/{id}/commitment").hasRole("consensus-user")
+                .requestMatchers(HttpMethod.GET, "/private/enrollments/{id}").authenticated()
+                .requestMatchers(HttpMethod.POST, "/private/processes/*/enrollments/**").hasRole("consensus-creator")
+                .requestMatchers(HttpMethod.DELETE, "/private/enrollments/{id}").hasRole("consensus-creator")
                 // ── Creator-only: process and team mutations ──
-                .requestMatchers(HttpMethod.POST, "/private/processes/**").hasRole("creator")
-                .requestMatchers(HttpMethod.PUT, "/private/processes/**").hasRole("creator")
-                .requestMatchers(HttpMethod.DELETE, "/private/processes/**").hasRole("creator")
-                .requestMatchers(HttpMethod.POST, "/private/teams/**").hasRole("creator")
-                .requestMatchers(HttpMethod.PUT, "/private/teams/**").hasRole("creator")
-                .requestMatchers(HttpMethod.DELETE, "/private/teams/**").hasRole("creator")
+                .requestMatchers(HttpMethod.POST, "/private/processes/**").hasRole("consensus-creator")
+                .requestMatchers(HttpMethod.PUT, "/private/processes/**").hasRole("consensus-creator")
+                .requestMatchers(HttpMethod.DELETE, "/private/processes/**").hasRole("consensus-creator")
+                .requestMatchers(HttpMethod.POST, "/private/teams/**").hasRole("consensus-creator")
+                .requestMatchers(HttpMethod.PUT, "/private/teams/**").hasRole("consensus-creator")
+                .requestMatchers(HttpMethod.DELETE, "/private/teams/**").hasRole("consensus-creator")
                 // ── Public endpoints ──
                 .requestMatchers("/public/**").permitAll()
                 // ── Fallback: all other requests require auth ──
@@ -102,7 +105,7 @@ public class SecurityConfig {
     /**
      * Converts the JWT {@code roles} claim into Spring Security authorities.
      *
-     * <p>Logto sends roles as a {@code roles} claim (e.g. {@code ["creator", "user"]}).
+     * <p>Logto sends roles as a {@code roles} claim (e.g. {@code ["consensus-creator", "consensus-user"]}).
      * Spring Security expects authorities in the format {@code ROLE_<rolename>}.
      * This converter maps each role to a {@code ROLE_}-prefixed {@link SimpleGrantedAuthority}.
      */

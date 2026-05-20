@@ -5,6 +5,7 @@ import com.carmenio.consensus.application.dto.enrollment.CreateEnrollmentRequest
 import com.carmenio.consensus.application.dto.enrollment.EnrollmentResponse;
 import com.carmenio.consensus.application.use_case.enrollment.ClaimEnrollmentUseCase;
 import com.carmenio.consensus.application.use_case.enrollment.CreateEnrollmentUseCase;
+import com.carmenio.consensus.application.use_case.enrollment.DeleteEnrollmentUseCase;
 import com.carmenio.consensus.application.use_case.enrollment.FindEnrollmentByIdUseCase;
 import com.carmenio.consensus.application.use_case.enrollment.ListEnrollmentsByProcessUseCase;
 import com.carmenio.consensus.presentation.middleware.ApiResponse;
@@ -24,11 +25,12 @@ import java.util.UUID;
  * <p>
  * Two-phase enrollment flow:
  * <ol>
- *   <li><b>Creator phase</b> — POST registers voter emails (requires {@code creator} role)</li>
+ *   <li><b>Creator phase</b> — POST registers voter emails (requires {@code consensus-creator} role)</li>
  *   <li><b>User phase</b> — PUT claims an enrollment with JWT email match
- *       and Semaphore commitment (requires {@code user} role)</li>
+ *       and Semaphore commitment (requires {@code consensus-user} role)</li>
  * </ol>
- * GET endpoints (list and find by ID) require {@code user} role.
+ * GET endpoints require authentication (any role).
+ * DELETE requires {@code consensus-creator} role.
  * All endpoints return a standardized {@link ApiResponse} wrapper.
  */
 @RestController
@@ -40,12 +42,13 @@ public class EnrollmentController {
     private final ClaimEnrollmentUseCase claimEnrollmentUseCase;
     private final ListEnrollmentsByProcessUseCase listEnrollmentsUseCase;
     private final FindEnrollmentByIdUseCase findEnrollmentByIdUseCase;
+    private final DeleteEnrollmentUseCase deleteEnrollmentUseCase;
 
     /**
      * Creates a new enrollment with email only (creator phase).
      * The enrollment is not yet claimed — userId and commitment remain null.
      * <p>
-     * Requires {@code creator} role (enforced by SecurityConfig).
+     * Requires {@code consensus-creator} role (enforced by SecurityConfig).
      */
     @PostMapping("/processes/{processId}/enrollments")
     public ResponseEntity<ApiResponse<EnrollmentResponse>> create(
@@ -64,7 +67,7 @@ public class EnrollmentController {
      * pre-registered email. The JWT {@code sub} claim becomes the userId, and the
      * provided commitment is validated for uniqueness in the process.
      * <p>
-     * Requires {@code user} role (enforced by SecurityConfig).
+     * Requires {@code consensus-user} role (enforced by SecurityConfig).
      */
     @PutMapping("/enrollments/{id}/commitment")
     public ResponseEntity<ApiResponse<EnrollmentResponse>> claim(
@@ -78,7 +81,7 @@ public class EnrollmentController {
     /**
      * Lists all enrollments for an electoral process.
      * <p>
-     * Requires {@code user} role (enforced by SecurityConfig).
+     * Requires authentication (enforced by SecurityConfig).
      */
     @GetMapping("/processes/{processId}/enrollments")
     public ResponseEntity<ApiResponse<List<EnrollmentResponse>>> list(
@@ -90,12 +93,23 @@ public class EnrollmentController {
     /**
      * Finds an enrollment by its ID.
      * <p>
-     * Requires {@code user} role (enforced by SecurityConfig).
+     * Requires authentication (enforced by SecurityConfig).
      */
     @GetMapping("/enrollments/{id}")
     public ResponseEntity<ApiResponse<EnrollmentResponse>> findById(
             @PathVariable UUID id) {
         var response = findEnrollmentByIdUseCase.execute(id);
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    /**
+     * Deletes an enrollment by its ID.
+     * <p>
+     * Requires {@code consensus-creator} role (enforced by SecurityConfig).
+     */
+    @DeleteMapping("/enrollments/{id}")
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
+        deleteEnrollmentUseCase.execute(id);
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 }

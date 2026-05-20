@@ -108,73 +108,73 @@ class SecurityConfigTest {
     }
 
     @Test
-    @DisplayName("POST /private/processes should return 403 with user role")
+    @DisplayName("POST /private/processes should return 403 with consensus-user role")
     void protectedPostProcessesWithUserRole() throws Exception {
         mockMvc.perform(post("/private/processes")
                         .contentType("application/json")
                         .content("{}")
-                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_user"))))
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_consensus-user"))))
                 .andExpect(status().isForbidden());
     }
 
     @Test
-    @DisplayName("POST /private/processes should return 200 with creator role")
+    @DisplayName("POST /private/processes should return 200 with consensus-creator role")
     void protectedPostProcessesWithCreatorRole() throws Exception {
         mockMvc.perform(post("/private/processes")
                         .contentType("application/json")
                         .content("{}")
-                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_creator"))))
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_consensus-creator"))))
                 .andExpect(status().isOk());
     }
 
     @Test
-    @DisplayName("PUT /private/processes/{id} should return 200 with creator role")
+    @DisplayName("PUT /private/processes/{id} should return 200 with consensus-creator role")
     void protectedPutProcessesWithCreatorRole() throws Exception {
         mockMvc.perform(put("/private/processes/{id}", UUID.randomUUID())
                         .contentType("application/json")
                         .content("{}")
-                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_creator"))))
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_consensus-creator"))))
                 .andExpect(status().isOk());
     }
 
     @Test
-    @DisplayName("DELETE /private/processes/{id} should return 200 with creator role")
+    @DisplayName("DELETE /private/processes/{id} should return 200 with consensus-creator role")
     void protectedDeleteProcessesWithCreatorRole() throws Exception {
         mockMvc.perform(delete("/private/processes/{id}", UUID.randomUUID())
-                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_creator"))))
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_consensus-creator"))))
                 .andExpect(status().isOk());
     }
 
     @Test
-    @DisplayName("POST /private/processes/{processId}/teams should return 200 with creator role")
+    @DisplayName("POST /private/processes/{processId}/teams should return 200 with consensus-creator role")
     void protectedPostTeamsWithCreatorRole() throws Exception {
         mockMvc.perform(post("/private/processes/{processId}/teams", UUID.randomUUID())
                         .contentType("application/json")
                         .content("{}")
-                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_creator"))))
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_consensus-creator"))))
                 .andExpect(status().isOk());
     }
 
     @Test
-    @DisplayName("PUT /private/teams/{id} should return 200 with creator role")
+    @DisplayName("PUT /private/teams/{id} should return 200 with consensus-creator role")
     void protectedPutTeamsWithCreatorRole() throws Exception {
         mockMvc.perform(put("/private/teams/{id}", UUID.randomUUID())
                         .contentType("application/json")
                         .content("{}")
-                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_creator"))))
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_consensus-creator"))))
                 .andExpect(status().isOk());
     }
 
     @Test
-    @DisplayName("DELETE /private/teams/{id} should return 200 with creator role")
+    @DisplayName("DELETE /private/teams/{id} should return 200 with consensus-creator role")
     void protectedDeleteTeamsWithCreatorRole() throws Exception {
         mockMvc.perform(delete("/private/teams/{id}", UUID.randomUUID())
-                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_creator"))))
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_consensus-creator"))))
                 .andExpect(status().isOk());
     }
 
     // ──────────────────────────────────────────────
-    // Enrollment POST (creator role — changed from user)
+    // Enrollment POST (consensus-creator role)
     // ──────────────────────────────────────────────
 
     @Test
@@ -187,27 +187,27 @@ class SecurityConfigTest {
     }
 
     @Test
-    @DisplayName("POST /private/processes/{processId}/enrollments should return 403 with user role")
+    @DisplayName("POST /private/processes/{processId}/enrollments should return 403 with consensus-user role")
     void protectedPostEnrollmentsWithUserRole() throws Exception {
         mockMvc.perform(post("/private/processes/{processId}/enrollments", UUID.randomUUID())
                         .contentType("application/json")
                         .content("{}")
-                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_user"))))
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_consensus-user"))))
                 .andExpect(status().isForbidden());
     }
 
     @Test
-    @DisplayName("POST /private/processes/{processId}/enrollments should return 200 with creator role")
+    @DisplayName("POST /private/processes/{processId}/enrollments should return 200 with consensus-creator role")
     void protectedPostEnrollmentsWithCreatorRole() throws Exception {
         mockMvc.perform(post("/private/processes/{processId}/enrollments", UUID.randomUUID())
                         .contentType("application/json")
                         .content("{}")
-                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_creator"))))
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_consensus-creator"))))
                 .andExpect(status().isOk());
     }
 
     // ──────────────────────────────────────────────
-    // Enrollment PUT /private/enrollments/{id}/commitment (user role — NEW)
+    // Enrollment PUT /private/enrollments/{id}/commitment (consensus-user role)
     // ──────────────────────────────────────────────
 
     @Test
@@ -220,27 +220,27 @@ class SecurityConfigTest {
     }
 
     @Test
-    @DisplayName("PUT /private/enrollments/{id}/commitment should return 200 with user role")
+    @DisplayName("PUT /private/enrollments/{id}/commitment should return 200 with consensus-user role")
     void protectedPutClaimEnrollmentWithUserRole() throws Exception {
         mockMvc.perform(put("/private/enrollments/{id}/commitment", UUID.randomUUID())
                         .contentType("application/json")
                         .content("{}")
-                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_user"))))
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_consensus-user"))))
                 .andExpect(status().isOk());
     }
 
     @Test
-    @DisplayName("PUT /private/enrollments/{id}/commitment should return 403 with creator role")
+    @DisplayName("PUT /private/enrollments/{id}/commitment should return 403 with consensus-creator role")
     void protectedPutClaimEnrollmentWithCreatorRole() throws Exception {
         mockMvc.perform(put("/private/enrollments/{id}/commitment", UUID.randomUUID())
                         .contentType("application/json")
                         .content("{}")
-                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_creator"))))
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_consensus-creator"))))
                 .andExpect(status().isForbidden());
     }
 
     // ──────────────────────────────────────────────
-    // Enrollment GET (user role — unchanged)
+    // Enrollment GET (authenticated — no specific role required)
     // ──────────────────────────────────────────────
 
     @Test
@@ -251,10 +251,18 @@ class SecurityConfigTest {
     }
 
     @Test
-    @DisplayName("GET /private/processes/{processId}/enrollments should return 200 with user role")
+    @DisplayName("GET /private/processes/{processId}/enrollments should return 200 with consensus-user role")
     void protectedGetEnrollmentsWithUserRole() throws Exception {
         mockMvc.perform(get("/private/processes/{processId}/enrollments", UUID.randomUUID())
-                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_user"))))
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_consensus-user"))))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("GET /private/processes/{processId}/enrollments should return 200 with consensus-creator role")
+    void protectedGetEnrollmentsWithCreatorRole() throws Exception {
+        mockMvc.perform(get("/private/processes/{processId}/enrollments", UUID.randomUUID())
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_consensus-creator"))))
                 .andExpect(status().isOk());
     }
 
@@ -266,10 +274,45 @@ class SecurityConfigTest {
     }
 
     @Test
-    @DisplayName("GET /private/enrollments/{id} should return 200 with user role")
+    @DisplayName("GET /private/enrollments/{id} should return 200 with consensus-user role")
     void protectedGetEnrollmentByIdWithUserRole() throws Exception {
         mockMvc.perform(get("/private/enrollments/{id}", UUID.randomUUID())
-                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_user"))))
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_consensus-user"))))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("GET /private/enrollments/{id} should return 200 with consensus-creator role")
+    void protectedGetEnrollmentByIdWithCreatorRole() throws Exception {
+        mockMvc.perform(get("/private/enrollments/{id}", UUID.randomUUID())
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_consensus-creator"))))
+                .andExpect(status().isOk());
+    }
+
+    // ──────────────────────────────────────────────
+    // Enrollment DELETE (consensus-creator role only — NEW)
+    // ──────────────────────────────────────────────
+
+    @Test
+    @DisplayName("DELETE /private/enrollments/{id} should return 401 without token")
+    void protectedDeleteEnrollmentWithoutToken() throws Exception {
+        mockMvc.perform(delete("/private/enrollments/{id}", UUID.randomUUID()))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("DELETE /private/enrollments/{id} should return 403 with consensus-user role")
+    void protectedDeleteEnrollmentWithUserRole() throws Exception {
+        mockMvc.perform(delete("/private/enrollments/{id}", UUID.randomUUID())
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_consensus-user"))))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("DELETE /private/enrollments/{id} should return 200 with consensus-creator role")
+    void protectedDeleteEnrollmentWithCreatorRole() throws Exception {
+        mockMvc.perform(delete("/private/enrollments/{id}", UUID.randomUUID())
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_consensus-creator"))))
                 .andExpect(status().isOk());
     }
 }

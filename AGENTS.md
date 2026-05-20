@@ -349,10 +349,13 @@ La API utiliza **Logto** como Identity Provider con OAuth2 Resource Server + JWT
 | `/api/public/teams/**` | GET | ❌ Público | — |
 | `/api/public/processes/{id}/results` | GET | ❌ Público | — |
 | `/api/public/records` | POST | ➖ Exento | Semaphore Relayer |
-| `/api/private/processes/**` | POST, PUT, DELETE | ✅ Protegido | `creator` |
-| `/api/private/teams/**` | POST, PUT, DELETE | ✅ Protegido | `creator` |
-| `/api/private/processes/{processId}/enrollments` | GET, POST | ✅ Protegido | `user` |
-| `/api/private/enrollments/{id}` | GET | ✅ Protegido | `user` |
+| `/api/private/processes/**` | POST, PUT, DELETE | ✅ Protegido | `consensus-creator` |
+| `/api/private/teams/**` | POST, PUT, DELETE | ✅ Protegido | `consensus-creator` |
+| `/api/private/processes/{processId}/enrollments` | POST | ✅ Protegido | `consensus-creator` |
+| `/api/private/processes/{processId}/enrollments` | GET | ✅ Protegido | Autenticado |
+| `/api/private/enrollments/{id}` | GET | ✅ Protegido | Autenticado |
+| `/api/private/enrollments/{id}/commitment` | PUT | ✅ Protegido | `consensus-user` |
+| `/api/private/enrollments/{id}` | DELETE | ✅ Protegido | `consensus-creator` |
 
 ### 10.3 Configuración
 
@@ -390,11 +393,11 @@ Variables de entorno requeridas:
 Logto envía roles en el claim `roles` del JWT como un array de strings:
 ```json
 {
-  "roles": ["creator", "user"]
+  "roles": ["consensus-creator", "consensus-user"]
 }
 ```
 
-El `JwtAuthenticationConverter` en `SecurityConfig` mapea cada rol a `ROLE_<rolename>`, permitiendo el uso de `hasRole("creator")` y `hasRole("user")` en las reglas de autorización.
+El `JwtAuthenticationConverter` en `SecurityConfig` mapea cada rol a `ROLE_<rolename>`, permitiendo el uso de `hasRole("consensus-creator")` y `hasRole("consensus-user")` en las reglas de autorización.
 
 ---
 

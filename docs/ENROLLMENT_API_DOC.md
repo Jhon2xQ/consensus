@@ -8,10 +8,11 @@ Base path: `/api/private`
 
 | Método | Endpoint | Auth | Rol |
 |--------|----------|------|-----|
-| GET | `/api/private/processes/{processId}/enrollments` | ✅ Bearer JWT | `user` |
-| GET | `/api/private/enrollments/{id}` | ✅ Bearer JWT | `user` |
-| POST | `/api/private/processes/{processId}/enrollments` | ✅ Bearer JWT | `creator` |
-| PUT | `/api/private/enrollments/{id}/commitment` | ✅ Bearer JWT | `user` |
+| GET | `/api/private/processes/{processId}/enrollments` | ✅ Bearer JWT | Authenticated |
+| GET | `/api/private/enrollments/{id}` | ✅ Bearer JWT | Authenticated |
+| POST | `/api/private/processes/{processId}/enrollments` | ✅ Bearer JWT | `consensus-creator` |
+| PUT | `/api/private/enrollments/{id}/commitment` | ✅ Bearer JWT | `consensus-user` |
+| DELETE | `/api/private/enrollments/{id}` | ✅ Bearer JWT | `consensus-creator` |
 
 Detalle completo debajo.
 
@@ -19,13 +20,14 @@ Detalle completo debajo.
 - [GET /api/private/enrollments/{id} — Obtener inscripción](#get-apiprivateenrollmentsid-obtener)
 - [POST /api/private/processes/{processId}/enrollments — Crear inscripción (Fase 1)](#post-apiprivateprocessesprocessidenrollments-crear)
 - [PUT /api/private/enrollments/{id}/commitment — Reclamar inscripción (Fase 2)](#put-apiprivateenrollmentsidcommitment-reclamar)
+- [DELETE /api/private/enrollments/{id} — Eliminar inscripción](#delete-apiprivateenrollmentsid-eliminar)
 
 ---
 
 ## Flujo de dos fases
 
-1. **Fase 1 — Creator registra emails**: Un usuario con rol `creator` crea una inscripción proporcionando solo el email del votante. La inscripción queda con `userId: null` y `commitment: null`.
-2. **Fase 2 — Usuario reclama su slot**: Un usuario con rol `user` autenticado vía JWT reclama la inscripción. El email del JWT debe coincidir con el email registrado. El `sub` del JWT se guarda como `userId` y el commitment de Semaphore se guarda desde el body.
+1. **Fase 1 — Creator registra emails**: Un usuario con rol `consensus-creator` crea una inscripción proporcionando solo el email del votante. La inscripción queda con `userId: null` y `commitment: null`.
+2. **Fase 2 — Usuario reclama su slot**: Un usuario con rol `consensus-user` autenticado vía JWT reclama la inscripción. El email del JWT debe coincidir con el email registrado. El `sub` del JWT se guarda como `userId` y el commitment de Semaphore se guarda desde el body.
 
 ---
 
@@ -33,7 +35,7 @@ Detalle completo debajo.
 
 Lista todas las inscripciones de un proceso electoral.
 
-> **Auth**: ✅ Bearer JWT — Requiere rol `user`
+> **Auth**: ✅ Bearer JWT — Requiere autenticación (cualquier rol)
 
 ### Parámetros (Path)
 
@@ -78,7 +80,7 @@ Lista todas las inscripciones de un proceso electoral.
 
 Obtiene una inscripción por su ID.
 
-> **Auth**: ✅ Bearer JWT — Requiere rol `user`
+> **Auth**: ✅ Bearer JWT — Requiere autenticación (cualquier rol)
 
 ### Parámetros (Path)
 
@@ -123,7 +125,7 @@ Obtiene una inscripción por su ID.
 
 Solo se permite crear inscripciones cuando el proceso está en estado `NONE` o `COMMITMENT`.
 
-> **Auth**: ✅ Bearer JWT — Requiere rol `creator`
+> **Auth**: ✅ Bearer JWT — Requiere rol `consensus-creator`
 
 ### Parámetros (Path)
 
@@ -211,7 +213,7 @@ Solo se permite crear inscripciones cuando el proceso está en estado `NONE` o `
 
 Solo se permite reclamar inscripciones cuando el proceso está en estado `NONE` o `COMMITMENT`.
 
-> **Auth**: ✅ Bearer JWT — Requiere rol `user` y claim `email` en el JWT
+> **Auth**: ✅ Bearer JWT — Requiere rol `consensus-user` y claim `email` en el JWT
 
 ### Parámetros (Path)
 
@@ -304,6 +306,53 @@ Solo se permite reclamar inscripciones cuando el proceso está en estado `NONE` 
 {
   "success": false,
   "message": "Enrollment with userId already exists",
+  "data": null,
+  "timestamp": 1234567890
+}
+```
+
+---
+
+## DELETE /api/private/enrollments/{id} <a name="delete-apiprivateenrollmentsid-eliminar"></a>
+
+Elimina una inscripción por su ID.
+
+> **Auth**: ✅ Bearer JWT — Requiere rol `consensus-creator`
+
+### Parámetros (Path)
+
+| Nombre | Tipo | Requerido |
+|--------|------|-----------|
+| `id` | UUID | Sí |
+
+### Respuesta `200 OK`
+
+```
+{
+  "success": true,
+  "message": "Operation successful",
+  "data": null,
+  "timestamp": 1234567890
+}
+```
+
+### Respuesta `403 Forbidden`
+
+```
+{
+  "success": false,
+  "message": "Access denied: insufficient permissions",
+  "data": null,
+  "timestamp": 1234567890
+}
+```
+
+### Respuesta `404 Not Found`
+
+```
+{
+  "success": false,
+  "message": "Enrollment not found",
   "data": null,
   "timestamp": 1234567890
 }

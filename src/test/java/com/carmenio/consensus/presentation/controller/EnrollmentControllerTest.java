@@ -5,6 +5,7 @@ import com.carmenio.consensus.application.dto.enrollment.CreateEnrollmentRequest
 import com.carmenio.consensus.application.dto.enrollment.EnrollmentResponse;
 import com.carmenio.consensus.application.use_case.enrollment.ClaimEnrollmentUseCase;
 import com.carmenio.consensus.application.use_case.enrollment.CreateEnrollmentUseCase;
+import com.carmenio.consensus.application.use_case.enrollment.DeleteEnrollmentUseCase;
 import com.carmenio.consensus.application.use_case.enrollment.FindEnrollmentByIdUseCase;
 import com.carmenio.consensus.application.use_case.enrollment.ListEnrollmentsByProcessUseCase;
 import com.carmenio.consensus.domain.exception.ElectoralProcessException;
@@ -25,6 +26,8 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -51,6 +54,9 @@ class EnrollmentControllerTest {
 
     @MockitoBean
     private ClaimEnrollmentUseCase claimEnrollmentUseCase;
+
+    @MockitoBean
+    private DeleteEnrollmentUseCase deleteEnrollmentUseCase;
 
     // ── POST /private/processes/{processId}/enrollments ──
 
@@ -306,6 +312,32 @@ class EnrollmentControllerTest {
         when(findEnrollmentByIdUseCase.execute(id)).thenThrow(EnrollmentException.notFound(id));
 
         mockMvc.perform(get("/private/enrollments/{id}", id))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.success").value(false));
+    }
+
+    // ── DELETE /private/enrollments/{id} ──
+
+    @Test
+    @DisplayName("DELETE /private/enrollments/{id} should delete enrollment")
+    void shouldDeleteEnrollment() throws Exception {
+        var id = UUID.randomUUID();
+
+        doNothing().when(deleteEnrollmentUseCase).execute(id);
+
+        mockMvc.perform(delete("/private/enrollments/{id}", id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true));
+    }
+
+    @Test
+    @DisplayName("DELETE /private/enrollments/{id} should return 404 when not found")
+    void shouldReturn404WhenDeleteEnrollmentNotFound() throws Exception {
+        var id = UUID.randomUUID();
+
+        doThrow(EnrollmentException.notFound(id)).when(deleteEnrollmentUseCase).execute(id);
+
+        mockMvc.perform(delete("/private/enrollments/{id}", id))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.success").value(false));
     }
