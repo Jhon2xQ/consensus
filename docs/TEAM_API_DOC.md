@@ -1,6 +1,7 @@
 # Team API
 
-Base path: `/api/private`
+Base path (public): `/api/public`
+Base path (private): `/api/private`
 
 ---
 
@@ -8,23 +9,23 @@ Base path: `/api/private`
 
 | Método | Endpoint | Auth | Rol |
 |--------|----------|------|-----|
-| GET | `/api/private/processes/{processId}/teams` | ❌ Público | — |
-| GET | `/api/private/teams/{id}` | ❌ Público | — |
+| GET | `/api/public/processes/{processId}/teams` | ❌ Público | — |
+| GET | `/api/public/teams/{id}` | ❌ Público | — |
 | POST | `/api/private/processes/{processId}/teams` | ✅ Bearer JWT | `creator` |
 | PUT | `/api/private/teams/{id}` | ✅ Bearer JWT | `creator` |
 | DELETE | `/api/private/teams/{id}` | ✅ Bearer JWT | `creator` |
 
 Detalle completo debajo.
 
-- [GET /api/private/processes/{processId}/teams — Listar equipos](#get-apiprivateprocessesprocessidteams-listar)
-- [GET /api/private/teams/{id} — Obtener equipo](#get-apiprivateteamsid-obtener)
+- [GET /api/public/processes/{processId}/teams — Listar equipos](#get-apipublicprocessesprocessidteams-listar)
+- [GET /api/public/teams/{id} — Obtener equipo](#get-apipublicteamsid-obtener)
 - [POST /api/private/processes/{processId}/teams — Crear equipo](#post-apiprivateprocessesprocessidteams-crear)
 - [PUT /api/private/teams/{id} — Actualizar equipo](#put-apiprivateteamsid-actualizar)
 - [DELETE /api/private/teams/{id} — Eliminar equipo](#delete-apiprivateteamsid-eliminar)
 
 ---
 
-## GET /api/private/processes/{processId}/teams <a name="get-apiprivateprocessesprocessidteams-listar"></a>
+## GET /api/public/processes/{processId}/teams <a name="get-apipublicprocessesprocessidteams-listar"></a>
 
 Lista todos los equipos de un proceso electoral.
 
@@ -67,7 +68,7 @@ Lista todos los equipos de un proceso electoral.
 
 ---
 
-## GET /api/private/teams/{id} <a name="get-apiprivateteamsid-obtener"></a>
+## GET /api/public/teams/{id} <a name="get-apipublicteamsid-obtener"></a>
 
 Obtiene un equipo por su ID.
 

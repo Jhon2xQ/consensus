@@ -19,8 +19,10 @@ import java.util.UUID;
  * <p>
  * Records are consumed by the Semaphore Relayer after on-chain proof validation.
  * Results are calculated in real-time and only available for CLOSED processes.
+ * No authentication required — these are public endpoints.
  */
 @RestController
+@RequestMapping("/public")
 @RequiredArgsConstructor
 public class RecordController {
 
@@ -33,7 +35,7 @@ public class RecordController {
      * @param request the vote record payload
      * @return the created (or existing, if idempotent) record
      */
-    @PostMapping("/api/private/records")
+    @PostMapping("/records")
     public ResponseEntity<ApiResponse<VoteRecordResponse>> createRecord(
             @Valid @RequestBody CreateVoteRecordRequest request) {
         var response = createVoteRecordUseCase.execute(request);
@@ -47,7 +49,7 @@ public class RecordController {
      * @param id the UUID of the electoral process
      * @return the process results with per-team vote tallies
      */
-    @GetMapping("/api/private/processes/{id}/results")
+    @GetMapping("/processes/{id}/results")
     public ResponseEntity<ApiResponse<ProcessResultsResponse>> getResults(
             @PathVariable UUID id) {
         var response = getProcessResultsUseCase.execute(id);

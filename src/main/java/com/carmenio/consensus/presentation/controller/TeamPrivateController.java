@@ -3,7 +3,9 @@ package com.carmenio.consensus.presentation.controller;
 import com.carmenio.consensus.application.dto.team.CreateTeamRequest;
 import com.carmenio.consensus.application.dto.team.TeamResponse;
 import com.carmenio.consensus.application.dto.team.UpdateTeamRequest;
-import com.carmenio.consensus.application.use_case.team.*;
+import com.carmenio.consensus.application.use_case.team.CreateTeamUseCase;
+import com.carmenio.consensus.application.use_case.team.DeleteTeamUseCase;
+import com.carmenio.consensus.application.use_case.team.UpdateTeamUseCase;
 import com.carmenio.consensus.presentation.middleware.ApiResponse;
 
 import jakarta.validation.Valid;
@@ -11,28 +13,27 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 /**
- * REST controller for team management within electoral processes.
+ * Protected mutation endpoints for teams.
  * <p>
+ * Requires {@code creator} role — authenticated via Logto JWT.
  * All endpoints return a standardized {@link ApiResponse} wrapper.
  */
 @RestController
+@RequestMapping("/private")
 @RequiredArgsConstructor
-public class TeamController {
+public class TeamPrivateController {
 
     private final CreateTeamUseCase createTeamUseCase;
-    private final ListTeamsByProcessUseCase listTeamsUseCase;
-    private final FindTeamByIdUseCase findTeamByIdUseCase;
     private final UpdateTeamUseCase updateTeamUseCase;
     private final DeleteTeamUseCase deleteTeamUseCase;
 
     /**
      * Creates a new team within an electoral process.
      */
-    @PostMapping("/api/private/processes/{processId}/teams")
+    @PostMapping("/processes/{processId}/teams")
     public ResponseEntity<ApiResponse<TeamResponse>> create(
             @PathVariable UUID processId,
             @Valid @RequestBody CreateTeamRequest request) {
@@ -42,29 +43,9 @@ public class TeamController {
     }
 
     /**
-     * Lists all teams for an electoral process.
-     */
-    @GetMapping("/api/private/processes/{processId}/teams")
-    public ResponseEntity<ApiResponse<List<TeamResponse>>> list(
-            @PathVariable UUID processId) {
-        var response = listTeamsUseCase.execute(processId);
-        return ResponseEntity.ok(ApiResponse.success(response));
-    }
-
-    /**
-     * Finds a team by its ID.
-     */
-    @GetMapping("/api/private/teams/{id}")
-    public ResponseEntity<ApiResponse<TeamResponse>> findById(
-            @PathVariable UUID id) {
-        var response = findTeamByIdUseCase.execute(id);
-        return ResponseEntity.ok(ApiResponse.success(response));
-    }
-
-    /**
      * Updates a team's name and/or avatar URL.
      */
-    @PutMapping("/api/private/teams/{id}")
+    @PutMapping("/teams/{id}")
     public ResponseEntity<ApiResponse<TeamResponse>> update(
             @PathVariable UUID id,
             @RequestBody UpdateTeamRequest request) {
@@ -76,7 +57,7 @@ public class TeamController {
     /**
      * Deletes a team by its ID.
      */
-    @DeleteMapping("/api/private/teams/{id}")
+    @DeleteMapping("/teams/{id}")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         deleteTeamUseCase.execute(id);
         return ResponseEntity.ok(ApiResponse.success("Team deleted successfully", null));

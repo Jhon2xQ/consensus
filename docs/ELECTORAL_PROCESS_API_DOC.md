@@ -1,6 +1,7 @@
 # Electoral Process API
 
-Base path: `/api/private/processes`
+Base path (public): `/api/public/processes`
+Base path (private): `/api/private/processes`
 
 ---
 
@@ -8,25 +9,25 @@ Base path: `/api/private/processes`
 
 | Método | Endpoint | Auth | Rol |
 |--------|----------|------|-----|
-| GET | `/api/private/processes` | ❌ Público | — |
-| GET | `/api/private/processes/{id}` | ❌ Público | — |
-| GET | `/api/private/processes/{id}/state` | ❌ Público | — |
+| GET | `/api/public/processes` | ❌ Público | — |
+| GET | `/api/public/processes/{id}` | ❌ Público | — |
+| GET | `/api/public/processes/{id}/state` | ❌ Público | — |
 | POST | `/api/private/processes` | ✅ Bearer JWT | `creator` |
 | PUT | `/api/private/processes/{id}` | ✅ Bearer JWT | `creator` |
 | DELETE | `/api/private/processes/{id}` | ✅ Bearer JWT | `creator` |
 
 Detalle completo debajo.
 
-- [GET /api/private/processes — Listar procesos](#get-apiprivateprocesses-listar)
-- [GET /api/private/processes/{id} — Obtener proceso](#get-apiprivateprocessesid-obtener)
-- [GET /api/private/processes/{id}/state — Estado actual](#get-apiprivateprocessesidstate-estado)
+- [GET /api/public/processes — Listar procesos](#get-apipublicprocesses-listar)
+- [GET /api/public/processes/{id} — Obtener proceso](#get-apipublicprocessesid-obtener)
+- [GET /api/public/processes/{id}/state — Estado actual](#get-apipublicprocessesidstate-estado)
 - [POST /api/private/processes — Crear proceso](#post-apiprivateprocesses-crear)
 - [PUT /api/private/processes/{id} — Actualizar proceso](#put-apiprivateprocessesid-actualizar)
 - [DELETE /api/private/processes/{id} — Eliminar proceso](#delete-apiprivateprocessesid-eliminar)
 
 ---
 
-## GET /api/private/processes <a name="get-apiprivateprocesses-listar"></a>
+## GET /api/public/processes <a name="get-apipublicprocesses-listar"></a>
 
 Lista todos los procesos electorales con paginación.
 
@@ -72,7 +73,7 @@ Lista todos los procesos electorales con paginación.
 
 ---
 
-## GET /api/private/processes/{id} <a name="get-apiprivateprocessesid-obtener"></a>
+## GET /api/public/processes/{id} <a name="get-apipublicprocessesid-obtener"></a>
 
 Obtiene un proceso electoral por su ID.
 
@@ -119,7 +120,7 @@ Obtiene un proceso electoral por su ID.
 
 ---
 
-## GET /api/private/processes/{id}/state <a name="get-apiprivateprocessesidstate-estado"></a>
+## GET /api/public/processes/{id}/state <a name="get-apipublicprocessesidstate-estado"></a>
 
 Obtiene el estado del proceso electoral. El estado se calcula en tiempo real basado en sus fechas, excepto PAUSED y CANCELLED que son locks manuales y se devuelven directamente.
 

@@ -18,9 +18,11 @@ import java.util.UUID;
 /**
  * REST controller for enrollment management within electoral processes.
  * <p>
+ * Requires {@code user} role — authenticated via Logto JWT.
  * All endpoints return a standardized {@link ApiResponse} wrapper.
  */
 @RestController
+@RequestMapping("/private")
 @RequiredArgsConstructor
 public class EnrollmentController {
 
@@ -31,7 +33,7 @@ public class EnrollmentController {
     /**
      * Creates a new enrollment within an electoral process.
      */
-    @PostMapping("/api/private/processes/{processId}/enrollments")
+    @PostMapping("/processes/{processId}/enrollments")
     public ResponseEntity<ApiResponse<EnrollmentResponse>> create(
             @PathVariable UUID processId,
             @Valid @RequestBody CreateEnrollmentRequest request) {
@@ -43,7 +45,7 @@ public class EnrollmentController {
     /**
      * Lists all enrollments for an electoral process.
      */
-    @GetMapping("/api/private/processes/{processId}/enrollments")
+    @GetMapping("/processes/{processId}/enrollments")
     public ResponseEntity<ApiResponse<List<EnrollmentResponse>>> list(
             @PathVariable UUID processId) {
         var response = listEnrollmentsUseCase.execute(processId);
@@ -53,7 +55,7 @@ public class EnrollmentController {
     /**
      * Finds an enrollment by its ID.
      */
-    @GetMapping("/api/private/enrollments/{id}")
+    @GetMapping("/enrollments/{id}")
     public ResponseEntity<ApiResponse<EnrollmentResponse>> findById(
             @PathVariable UUID id) {
         var response = findEnrollmentByIdUseCase.execute(id);

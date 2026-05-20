@@ -12,6 +12,7 @@ spring:
         jwt:
           issuer-uri: ${JWT_ISSUER}
           jwk-set-uri: ${JWKS_URI}
+          audiences: ${AUDIENCE}
 
   datasource:
     url: ${DB_URL:jdbc:h2:mem:consensus;DB_CLOSE_DELAY=-1}
@@ -35,6 +36,8 @@ spring:
 
 server:
   port: ${PORT:8080}
+  servlet:
+    context-path: /api
 
 logging:
   level:

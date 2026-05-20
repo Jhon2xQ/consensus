@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @DataJpaTest
 @ActiveProfiles("test")
-@Import(JpaElectoralProcessRepositoryAdapter.class)
+@Import({JpaElectoralProcessRepositoryAdapter.class, com.carmenio.consensus.common.config.JpaConfig.class})
 class JpaElectoralProcessRepositoryAdapterTest {
 
     @Autowired

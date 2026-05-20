@@ -45,7 +45,7 @@ class EnrollmentControllerTest {
     private ListEnrollmentsByProcessUseCase listEnrollmentsByProcessUseCase;
 
     @Test
-    @DisplayName("POST /api/private/processes/{processId}/enrollments should create enrollment")
+    @DisplayName("POST /private/processes/{processId}/enrollments should create enrollment")
     void shouldCreateEnrollment() throws Exception {
         var processId = UUID.randomUUID();
         var request = CreateEnrollmentRequest.builder()
@@ -64,7 +64,7 @@ class EnrollmentControllerTest {
 
         when(createEnrollmentUseCase.execute(any())).thenReturn(response);
 
-        mockMvc.perform(post("/api/private/processes/{processId}/enrollments", processId)
+        mockMvc.perform(post("/private/processes/{processId}/enrollments", processId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -87,7 +87,7 @@ class EnrollmentControllerTest {
         when(createEnrollmentUseCase.execute(any()))
                 .thenThrow(ElectoralProcessException.notFound(processId));
 
-        mockMvc.perform(post("/api/private/processes/{processId}/enrollments", processId)
+        mockMvc.perform(post("/private/processes/{processId}/enrollments", processId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
@@ -107,7 +107,7 @@ class EnrollmentControllerTest {
         when(createEnrollmentUseCase.execute(any()))
                 .thenThrow(EnrollmentException.alreadyExists("userId"));
 
-        mockMvc.perform(post("/api/private/processes/{processId}/enrollments", processId)
+        mockMvc.perform(post("/private/processes/{processId}/enrollments", processId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
@@ -115,7 +115,7 @@ class EnrollmentControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/private/processes/{processId}/enrollments should list enrollments")
+    @DisplayName("GET /private/processes/{processId}/enrollments should list enrollments")
     void shouldListEnrollments() throws Exception {
         var processId = UUID.randomUUID();
         var enrollment = EnrollmentResponse.builder()
@@ -128,20 +128,20 @@ class EnrollmentControllerTest {
 
         when(listEnrollmentsByProcessUseCase.execute(processId)).thenReturn(List.of(enrollment));
 
-        mockMvc.perform(get("/api/private/processes/{processId}/enrollments", processId))
+        mockMvc.perform(get("/private/processes/{processId}/enrollments", processId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data[0].userId").value("user-123"));
     }
 
     @Test
-    @DisplayName("GET /api/private/processes/{processId}/enrollments should return empty list")
+    @DisplayName("GET /private/processes/{processId}/enrollments should return empty list")
     void shouldReturnEmptyList() throws Exception {
         var processId = UUID.randomUUID();
 
         when(listEnrollmentsByProcessUseCase.execute(processId)).thenReturn(List.of());
 
-        mockMvc.perform(get("/api/private/processes/{processId}/enrollments", processId))
+        mockMvc.perform(get("/private/processes/{processId}/enrollments", processId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data").isArray())
@@ -149,7 +149,7 @@ class EnrollmentControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/private/enrollments/{id} should return enrollment")
+    @DisplayName("GET /private/enrollments/{id} should return enrollment")
     void shouldFindEnrollmentById() throws Exception {
         var id = UUID.randomUUID();
         var response = EnrollmentResponse.builder()
@@ -162,20 +162,20 @@ class EnrollmentControllerTest {
 
         when(findEnrollmentByIdUseCase.execute(id)).thenReturn(response);
 
-        mockMvc.perform(get("/api/private/enrollments/{id}", id))
+        mockMvc.perform(get("/private/enrollments/{id}", id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.userId").value("found-user"));
     }
 
     @Test
-    @DisplayName("GET /api/private/enrollments/{id} should return 404 when not found")
+    @DisplayName("GET /private/enrollments/{id} should return 404 when not found")
     void shouldReturn404WhenEnrollmentNotFound() throws Exception {
         var id = UUID.randomUUID();
 
         when(findEnrollmentByIdUseCase.execute(id)).thenThrow(EnrollmentException.notFound(id));
 
-        mockMvc.perform(get("/api/private/enrollments/{id}", id))
+        mockMvc.perform(get("/private/enrollments/{id}", id))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.success").value(false));
     }

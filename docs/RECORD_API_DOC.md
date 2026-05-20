@@ -1,6 +1,6 @@
 # Record API (Votos & Resultados)
 
-Base path: `/api/private`
+Base path: `/api/public`
 
 ---
 
@@ -8,17 +8,17 @@ Base path: `/api/private`
 
 | Método | Endpoint | Auth | Rol |
 |--------|----------|------|-----|
-| GET | `/api/private/processes/{id}/results` | ❌ Público | — |
-| POST | `/api/private/records` | ➖ Exento | Semaphore Relayer |
+| GET | `/api/public/processes/{id}/results` | ❌ Público | — |
+| POST | `/api/public/records` | ➖ Exento | Semaphore Relayer |
 
 Detalle completo debajo.
 
-- [GET /api/private/processes/{id}/results — Resultados del proceso](#get-apiprivateprocessesidresults-resultados)
-- [POST /api/private/records — Ingresar voto](#post-apiprivaterecords-ingresar)
+- [GET /api/public/processes/{id}/results — Resultados del proceso](#get-apipublicprocessesidresults-resultados)
+- [POST /api/public/records — Ingresar voto](#post-apipublicrecords-ingresar)
 
 ---
 
-## GET /api/private/processes/{id}/results <a name="get-apiprivateprocessesidresults-resultados"></a>
+## GET /api/public/processes/{id}/results <a name="get-apipublicprocessesidresults-resultados"></a>
 
 Obtiene los resultados de un proceso electoral. Solo disponible cuando el proceso está en estado `CLOSED`.
 
@@ -76,7 +76,7 @@ Obtiene los resultados de un proceso electoral. Solo disponible cuando el proces
 
 ---
 
-## POST /api/private/records <a name="post-apiprivaterecords-ingresar"></a>
+## POST /api/public/records <a name="post-apipublicrecords-ingresar"></a>
 
 Ingresa un voto validado desde el Semaphore Relayer. Endpoint **idempotente** — si ya existe un registro con el mismo `nullifier`, retorna el existente sin duplicar.
 

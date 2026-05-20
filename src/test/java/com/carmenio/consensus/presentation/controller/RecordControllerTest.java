@@ -44,7 +44,7 @@ class RecordControllerTest {
     private GetProcessResultsUseCase getProcessResultsUseCase;
 
     @Test
-    @DisplayName("POST /api/private/records should create vote record")
+    @DisplayName("POST /public/records should create vote record")
     void shouldCreateVoteRecord() throws Exception {
         var request = CreateVoteRecordRequest.builder()
                 .groupId("1")
@@ -66,7 +66,7 @@ class RecordControllerTest {
 
         when(createVoteRecordUseCase.execute(any())).thenReturn(response);
 
-        mockMvc.perform(post("/api/private/records")
+        mockMvc.perform(post("/public/records")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -77,7 +77,7 @@ class RecordControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/private/records should return 400 when scope invalid")
+    @DisplayName("POST /public/records should return 400 when scope invalid")
     void shouldReturn400WhenScopeInvalid() throws Exception {
         var request = CreateVoteRecordRequest.builder()
                 .groupId("1")
@@ -89,7 +89,7 @@ class RecordControllerTest {
         when(createVoteRecordUseCase.execute(any()))
                 .thenThrow(RecordException.invalidScope());
 
-        mockMvc.perform(post("/api/private/records")
+        mockMvc.perform(post("/public/records")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -97,7 +97,7 @@ class RecordControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/private/processes/{id}/results should return results")
+    @DisplayName("GET /public/processes/{id}/results should return results")
     void shouldReturnResults() throws Exception {
         var processId = UUID.randomUUID();
         var teamResults = List.of(
@@ -115,7 +115,7 @@ class RecordControllerTest {
 
         when(getProcessResultsUseCase.execute(processId)).thenReturn(response);
 
-        mockMvc.perform(get("/api/private/processes/{id}/results", processId))
+        mockMvc.perform(get("/public/processes/{id}/results", processId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.processId").value(processId.toString()))
@@ -126,14 +126,14 @@ class RecordControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/private/processes/{id}/results should return 400 when process not closed")
+    @DisplayName("GET /public/processes/{id}/results should return 400 when process not closed")
     void shouldReturn400WhenProcessNotClosed() throws Exception {
         var processId = UUID.randomUUID();
 
         when(getProcessResultsUseCase.execute(processId))
                 .thenThrow(ElectoralProcessException.invalidState("Results only available when process is closed"));
 
-        mockMvc.perform(get("/api/private/processes/{id}/results", processId))
+        mockMvc.perform(get("/public/processes/{id}/results", processId))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false));
     }

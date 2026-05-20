@@ -8,12 +8,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtValidators;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import org.springframework.security.core.GrantedAuthority;
 
@@ -23,13 +22,21 @@ import java.util.List;
  * Security configuration for the Consensus API.
  *
  * <p>Configures OAuth2 Resource Server with JWT validation via Logto.
- * Defines the route authorization matrix:
+ * JWT decoder is auto-configured by Spring Boot from
+ * {@code spring.security.oauth2.resourceserver.jwt.*} properties.
+ * Validates token signature (RS256), issuer, audience, and expiration.
+ *
+ * <p>Defines the route authorization matrix with {@code /public/**} for
+ * unauthenticated access and {@code /private/**} for role-protected operations.
+ * The {@code /api} prefix is applied via {@code server.servlet.context-path}.
+ *
+ * <h3>Route matrix</h3>
  * <ul>
- *   <li>Public GET endpoints for processes, teams, and results</li>
- *   <li>{@code POST /api/private/records} exempt (Semaphore Relayer)</li>
- *   <li>{@code creator} role for process and team mutations</li>
- *   <li>{@code user} role for enrollment operations</li>
- *   <li>All other requests require authentication</li>
+ *   <li>{@code /public/**} — open access (GET processes, teams, results; POST records)</li>
+ *   <li>{@code /private/processes/**} POST, PUT, DELETE — {@code creator} role</li>
+ *   <li>{@code /private/teams/**} POST, PUT, DELETE — {@code creator} role</li>
+ *   <li>{@code /private/**} enrollment endpoints — {@code user} role</li>
+ *   <li>Fallback — authenticated</li>
  * </ul>
  */
 @Configuration
@@ -37,51 +44,53 @@ import java.util.List;
 public class SecurityConfig {
 
     /**
-     * JWT decoder that validates tokens using Logto's JWKS endpoint.
-     * Keys are fetched lazily on first use, not at application startup.
-     * Issuer validation ensures tokens come from the expected Logto tenant.
+     * CORS configuration allowing the SvelteKit frontend to call the API.
+     * Origins are configured via the {@code CORS_ORIGINS} environment variable.
      */
     @Bean
-    public JwtDecoder jwtDecoder(
-            @Value("${JWKS_URI}") String jwksUri,
-            @Value("${JWT_ISSUER}") String issuer) {
-        NimbusJwtDecoder decoder = NimbusJwtDecoder.withJwkSetUri(jwksUri)
-                .jwsAlgorithm(SignatureAlgorithm.RS256)
-                .build();
-        decoder.setJwtValidator(JwtValidators.createDefaultWithIssuer(issuer));
-        return decoder;
+    public CorsConfigurationSource corsConfigurationSource(
+            @Value("${CORS_ORIGINS:}") String corsOrigins) {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(corsOrigins.isBlank()
+                ? List.of("*")
+                : List.of(corsOrigins.split(",")));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        config.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtDecoder jwtDecoder) throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            CorsConfigurationSource corsConfigurationSource) throws Exception {
         http
+            .cors(cors -> cors.configurationSource(corsConfigurationSource))
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 // ── Enrollment endpoints (most specific first) ──
-                .requestMatchers(HttpMethod.GET, "/api/private/processes/*/enrollments/**").hasRole("user")
-                .requestMatchers(HttpMethod.POST, "/api/private/processes/*/enrollments/**").hasRole("user")
-                .requestMatchers(HttpMethod.GET, "/api/private/enrollments/{id}").hasRole("user")
+                .requestMatchers(HttpMethod.GET, "/private/processes/*/enrollments/**").hasRole("user")
+                .requestMatchers(HttpMethod.POST, "/private/processes/*/enrollments/**").hasRole("user")
+                .requestMatchers(HttpMethod.GET, "/private/enrollments/{id}").hasRole("user")
                 // ── Creator-only: process and team mutations ──
-                .requestMatchers(HttpMethod.POST, "/api/private/processes/**").hasRole("creator")
-                .requestMatchers(HttpMethod.PUT, "/api/private/processes/**").hasRole("creator")
-                .requestMatchers(HttpMethod.DELETE, "/api/private/processes/**").hasRole("creator")
-                .requestMatchers(HttpMethod.POST, "/api/private/teams/**").hasRole("creator")
-                .requestMatchers(HttpMethod.PUT, "/api/private/teams/**").hasRole("creator")
-                .requestMatchers(HttpMethod.DELETE, "/api/private/teams/**").hasRole("creator")
-                // ── Public GET endpoints ──
-                .requestMatchers(HttpMethod.GET, "/api/private/processes/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/private/teams/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/private/processes/{id}/results").permitAll()
-                // ── Semaphore Relayer exemption ──
-                .requestMatchers(HttpMethod.POST, "/api/private/records").permitAll()
+                .requestMatchers(HttpMethod.POST, "/private/processes/**").hasRole("creator")
+                .requestMatchers(HttpMethod.PUT, "/private/processes/**").hasRole("creator")
+                .requestMatchers(HttpMethod.DELETE, "/private/processes/**").hasRole("creator")
+                .requestMatchers(HttpMethod.POST, "/private/teams/**").hasRole("creator")
+                .requestMatchers(HttpMethod.PUT, "/private/teams/**").hasRole("creator")
+                .requestMatchers(HttpMethod.DELETE, "/private/teams/**").hasRole("creator")
+                // ── Public endpoints ──
+                .requestMatchers("/public/**").permitAll()
                 // ── Fallback: all other requests require auth ──
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2
                 .jwt(jwt -> jwt
-                    .decoder(jwtDecoder)
                     .jwtAuthenticationConverter(jwtAuthenticationConverter())
                 )
             );

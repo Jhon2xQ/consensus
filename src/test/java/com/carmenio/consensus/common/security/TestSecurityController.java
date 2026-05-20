@@ -15,87 +15,96 @@ import java.util.UUID;
 /**
  * Minimal test controller providing endpoints for all route patterns
  * that the SecurityConfig protects. Used only in SecurityConfigTest.
+ *
+ * <p>Paths omit the {@code /api} context-path prefix since MockMvc
+ * sends requests directly to the dispatcher servlet.
  */
 @RestController
 @Profile("security-test")
 public class TestSecurityController {
 
-    @GetMapping("/api/private/processes")
+    // ── Public endpoints ──
+
+    @GetMapping("/public/processes")
     public ResponseEntity<ApiResponse<String>> listProcesses() {
         return ResponseEntity.ok(ApiResponse.success("ok"));
     }
 
-    @GetMapping("/api/private/processes/{id}")
+    @GetMapping("/public/processes/{id}")
     public ResponseEntity<ApiResponse<String>> getProcess(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.success("ok"));
     }
 
-    @GetMapping("/api/private/processes/{id}/state")
+    @GetMapping("/public/processes/{id}/state")
     public ResponseEntity<ApiResponse<String>> getProcessState(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.success("ok"));
     }
 
-    @GetMapping("/api/private/processes/{id}/results")
+    @GetMapping("/public/processes/{id}/results")
     public ResponseEntity<ApiResponse<String>> getResults(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.success("ok"));
     }
 
-    @GetMapping("/api/private/processes/{processId}/teams")
+    @GetMapping("/public/processes/{processId}/teams")
     public ResponseEntity<ApiResponse<String>> listTeams(@PathVariable UUID processId) {
         return ResponseEntity.ok(ApiResponse.success("ok"));
     }
 
-    @GetMapping("/api/private/teams/{id}")
+    @GetMapping("/public/teams/{id}")
     public ResponseEntity<ApiResponse<String>> getTeam(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.success("ok"));
     }
 
-    @PostMapping("/api/private/processes")
-    public ResponseEntity<ApiResponse<String>> createProcess() {
-        return ResponseEntity.ok(ApiResponse.success("ok"));
-    }
-
-    @PutMapping("/api/private/processes/{id}")
-    public ResponseEntity<ApiResponse<String>> updateProcess(@PathVariable UUID id) {
-        return ResponseEntity.ok(ApiResponse.success("ok"));
-    }
-
-    @DeleteMapping("/api/private/processes/{id}")
-    public ResponseEntity<ApiResponse<String>> deleteProcess(@PathVariable UUID id) {
-        return ResponseEntity.ok(ApiResponse.success("ok"));
-    }
-
-    @PostMapping("/api/private/processes/{processId}/teams")
-    public ResponseEntity<ApiResponse<String>> createTeam(@PathVariable UUID processId) {
-        return ResponseEntity.ok(ApiResponse.success("ok"));
-    }
-
-    @PutMapping("/api/private/teams/{id}")
-    public ResponseEntity<ApiResponse<String>> updateTeam(@PathVariable UUID id) {
-        return ResponseEntity.ok(ApiResponse.success("ok"));
-    }
-
-    @DeleteMapping("/api/private/teams/{id}")
-    public ResponseEntity<ApiResponse<String>> deleteTeam(@PathVariable UUID id) {
-        return ResponseEntity.ok(ApiResponse.success("ok"));
-    }
-
-    @PostMapping("/api/private/records")
+    @PostMapping("/public/records")
     public ResponseEntity<ApiResponse<String>> createRecord() {
         return ResponseEntity.ok(ApiResponse.success("ok"));
     }
 
-    @PostMapping("/api/private/processes/{processId}/enrollments")
+    // ── Creator-only endpoints ──
+
+    @PostMapping("/private/processes")
+    public ResponseEntity<ApiResponse<String>> createProcess() {
+        return ResponseEntity.ok(ApiResponse.success("ok"));
+    }
+
+    @PutMapping("/private/processes/{id}")
+    public ResponseEntity<ApiResponse<String>> updateProcess(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.success("ok"));
+    }
+
+    @DeleteMapping("/private/processes/{id}")
+    public ResponseEntity<ApiResponse<String>> deleteProcess(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.success("ok"));
+    }
+
+    @PostMapping("/private/processes/{processId}/teams")
+    public ResponseEntity<ApiResponse<String>> createTeam(@PathVariable UUID processId) {
+        return ResponseEntity.ok(ApiResponse.success("ok"));
+    }
+
+    @PutMapping("/private/teams/{id}")
+    public ResponseEntity<ApiResponse<String>> updateTeam(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.success("ok"));
+    }
+
+    @DeleteMapping("/private/teams/{id}")
+    public ResponseEntity<ApiResponse<String>> deleteTeam(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.success("ok"));
+    }
+
+    // ── User-only endpoints ──
+
+    @PostMapping("/private/processes/{processId}/enrollments")
     public ResponseEntity<ApiResponse<String>> createEnrollment(@PathVariable UUID processId) {
         return ResponseEntity.ok(ApiResponse.success("ok"));
     }
 
-    @GetMapping("/api/private/processes/{processId}/enrollments")
+    @GetMapping("/private/processes/{processId}/enrollments")
     public ResponseEntity<ApiResponse<String>> listEnrollments(@PathVariable UUID processId) {
         return ResponseEntity.ok(ApiResponse.success("ok"));
     }
 
-    @GetMapping("/api/private/enrollments/{id}")
+    @GetMapping("/private/enrollments/{id}")
     public ResponseEntity<ApiResponse<String>> getEnrollment(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.success("ok"));
     }

@@ -303,14 +303,14 @@ src/test/java/com/carmenio/consensus
 La documentación detallada de cada grupo de endpoints está en archivos separados dentro de `docs/`.
 Cada archivo incluye: parámetros, estructura de request/response, y códigos de estado.
 
-**Prefijo base**: `/api/private/`
+**Prefijo base**: `/api`
 
 | Grupo            | Archivo                                                                  | Endpoints                        |
 | ---------------- | ------------------------------------------------------------------------ | -------------------------------- |
-| ElectoralProcess | [`docs/ELECTORAL_PROCESS_API_DOC.md`](docs/ELECTORAL_PROCESS_API_DOC.md) | CRUD + estado + listado paginado |
-| Team             | [`docs/TEAM_API_DOC.md`](docs/TEAM_API_DOC.md)                           | CRUD completo                    |
-| Enrollment       | [`docs/ENROLLMENT_API_DOC.md`](docs/ENROLLMENT_API_DOC.md)               | Crear, listar, obtener por ID    |
-| Record (votos)   | [`docs/RECORD_API_DOC.md`](docs/RECORD_API_DOC.md)                       | Ingresar voto + resultados       |
+| ElectoralProcess | [`docs/ELECTORAL_PROCESS_API_DOC.md`](docs/ELECTORAL_PROCESS_API_DOC.md) | CRUD + estado + listado paginado, públicos y privados |
+| Team             | [`docs/TEAM_API_DOC.md`](docs/TEAM_API_DOC.md)                           | CRUD completo, públicos y privados |
+| Enrollment       | [`docs/ENROLLMENT_API_DOC.md`](docs/ENROLLMENT_API_DOC.md)               | Crear, listar, obtener por ID (privado) |
+| Record (votos)   | [`docs/RECORD_API_DOC.md`](docs/RECORD_API_DOC.md)                       | Ingresar voto + resultados (público) |
 
 ### 9.1 Reglas para Documentación de API
 
@@ -345,10 +345,10 @@ La API utiliza **Logto** como Identity Provider con OAuth2 Resource Server + JWT
 
 | Patrón | Método | Acceso | Rol Requerido |
 |--------|--------|--------|---------------|
-| `/api/private/processes/**` | GET | ❌ Público | — |
-| `/api/private/teams/**` | GET | ❌ Público | — |
-| `/api/private/processes/{id}/results` | GET | ❌ Público | — |
-| `/api/private/records` | POST | ➖ Exento | Semaphore Relayer |
+| `/api/public/processes/**` | GET | ❌ Público | — |
+| `/api/public/teams/**` | GET | ❌ Público | — |
+| `/api/public/processes/{id}/results` | GET | ❌ Público | — |
+| `/api/public/records` | POST | ➖ Exento | Semaphore Relayer |
 | `/api/private/processes/**` | POST, PUT, DELETE | ✅ Protegido | `creator` |
 | `/api/private/teams/**` | POST, PUT, DELETE | ✅ Protegido | `creator` |
 | `/api/private/processes/{processId}/enrollments` | GET, POST | ✅ Protegido | `user` |
@@ -357,6 +357,10 @@ La API utiliza **Logto** como Identity Provider con OAuth2 Resource Server + JWT
 ### 10.3 Configuración
 
 ```yaml
+server:
+  servlet:
+    context-path: /api
+
 spring:
   security:
     oauth2:
@@ -369,6 +373,8 @@ spring:
 Variables de entorno requeridas:
 - `JWT_ISSUER` — URL del issuer de Logto
 - `JWKS_URI` — URL del JWKS endpoint de Logto
+- `AUDIENCE` — API Resource identifier configurado en Logto (ej. `https://api.consensus.carmenio.com`)
+- `CORS_ORIGINS` — Orígenes permitidos para CORS (separados por coma)
 
 ### 10.4 Clases de Seguridad
 
