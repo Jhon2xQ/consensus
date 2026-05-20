@@ -25,5 +25,9 @@ public interface EnrollmentRepository {
 
     boolean existsByElectoralProcessIdAndCommitment(UUID electoralProcessId, String commitment);
 
+    Optional<Enrollment> findByElectoralProcessIdAndEmail(UUID electoralProcessId, String email);
+
+    boolean existsByElectoralProcessIdAndEmail(UUID electoralProcessId, String email);
+
     long countByElectoralProcessId(UUID electoralProcessId);
 }

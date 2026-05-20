@@ -36,6 +36,7 @@ class JpaEnrollmentRepositoryAdapterTest {
         var processId = UUID.randomUUID();
         var enrollment = Enrollment.builder()
                 .electoralProcessId(processId)
+                .email("user-1@example.com")
                 .userId("user-1")
                 .commitment("1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
                 .build();
@@ -45,6 +46,7 @@ class JpaEnrollmentRepositoryAdapterTest {
 
         var found = repository.findById(saved.getId());
         assertTrue(found.isPresent());
+        assertEquals("user-1@example.com", found.get().getEmail());
         assertEquals("user-1", found.get().getUserId());
         assertEquals(processId, found.get().getElectoralProcessId());
         assertFalse(found.get().isHasVoted());
@@ -63,11 +65,13 @@ class JpaEnrollmentRepositoryAdapterTest {
         var processId = UUID.randomUUID();
         repository.save(Enrollment.builder()
                 .electoralProcessId(processId)
+                .email("user-1@example.com")
                 .userId("user-1")
                 .commitment("1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
                 .build());
         repository.save(Enrollment.builder()
                 .electoralProcessId(processId)
+                .email("user-2@example.com")
                 .userId("user-2")
                 .commitment("2222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222")
                 .build());
@@ -89,6 +93,7 @@ class JpaEnrollmentRepositoryAdapterTest {
         var processId = UUID.randomUUID();
         repository.save(Enrollment.builder()
                 .electoralProcessId(processId)
+                .email("user-1@example.com")
                 .userId("user-1")
                 .commitment("1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
                 .build());
@@ -105,6 +110,7 @@ class JpaEnrollmentRepositoryAdapterTest {
         var commitment = "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
         repository.save(Enrollment.builder()
                 .electoralProcessId(processId)
+                .email("user-1@example.com")
                 .userId("user-1")
                 .commitment(commitment)
                 .build());
@@ -121,11 +127,13 @@ class JpaEnrollmentRepositoryAdapterTest {
 
         repository.save(Enrollment.builder()
                 .electoralProcessId(processId)
+                .email("user-1@example.com")
                 .userId("user-1")
                 .commitment("1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
                 .build());
         repository.save(Enrollment.builder()
                 .electoralProcessId(processId)
+                .email("user-2@example.com")
                 .userId("user-2")
                 .commitment("2222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222")
                 .build());
@@ -138,6 +146,7 @@ class JpaEnrollmentRepositoryAdapterTest {
     void shouldDelete() {
         var enrollment = Enrollment.builder()
                 .electoralProcessId(UUID.randomUUID())
+                .email("user-1@example.com")
                 .userId("user-1")
                 .commitment("1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
                 .build();
@@ -150,13 +159,13 @@ class JpaEnrollmentRepositoryAdapterTest {
     }
 
     @Test
-    @DisplayName("Should enforce unique (processId, userId) constraint")
-    void shouldEnforceUniqueProcessIdUserId() {
+    @DisplayName("Should enforce unique (processId, email) constraint")
+    void shouldEnforceUniqueProcessIdEmail() {
         var processId = UUID.randomUUID();
+        var email = "voter@example.com";
         var enrollment = Enrollment.builder()
                 .electoralProcessId(processId)
-                .userId("user-1")
-                .commitment("1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+                .email(email)
                 .build();
 
         repository.save(enrollment);
@@ -164,8 +173,7 @@ class JpaEnrollmentRepositoryAdapterTest {
 
         var duplicate = Enrollment.builder()
                 .electoralProcessId(processId)
-                .userId("user-1")  // same userId within same process
-                .commitment("2222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222")
+                .email(email)  // same email within same process
                 .build();
 
         repository.save(duplicate);
@@ -179,6 +187,7 @@ class JpaEnrollmentRepositoryAdapterTest {
         var commitment = "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
         var enrollment = Enrollment.builder()
                 .electoralProcessId(processId)
+                .email("user-1@example.com")
                 .userId("user-1")
                 .commitment(commitment)
                 .build();
@@ -188,11 +197,63 @@ class JpaEnrollmentRepositoryAdapterTest {
 
         var duplicate = Enrollment.builder()
                 .electoralProcessId(processId)
+                .email("user-2@example.com")
                 .userId("user-2")  // different user
                 .commitment(commitment)  // same commitment within same process
                 .build();
 
         repository.save(duplicate);
         assertThrows(Exception.class, () -> entityManager.flush());
+    }
+
+    // === NEW: email-based repository queries ===
+
+    @Test
+    @DisplayName("Should find enrollment by process ID and email")
+    void shouldFindByElectoralProcessIdAndEmail() {
+        var processId = UUID.randomUUID();
+        var email = "voter@example.com";
+        repository.save(Enrollment.builder()
+                .electoralProcessId(processId)
+                .email(email)
+                .build());
+
+        var found = repository.findByElectoralProcessIdAndEmail(processId, email);
+        assertTrue(found.isPresent());
+        assertEquals(email, found.get().getEmail());
+        assertEquals(processId, found.get().getElectoralProcessId());
+        assertNull(found.get().getUserId());
+        assertNull(found.get().getCommitment());
+    }
+
+    @Test
+    @DisplayName("Should return empty when email not found in process")
+    void shouldReturnEmptyWhenEmailNotFoundInProcess() {
+        var processId = UUID.randomUUID();
+        repository.save(Enrollment.builder()
+                .electoralProcessId(processId)
+                .email("voter@example.com")
+                .build());
+
+        var found = repository.findByElectoralProcessIdAndEmail(processId, "unknown@example.com");
+        assertTrue(found.isEmpty());
+
+        var foundOtherProcess = repository.findByElectoralProcessIdAndEmail(UUID.randomUUID(), "voter@example.com");
+        assertTrue(foundOtherProcess.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should check existence by process ID and email")
+    void shouldCheckExistsByProcessIdAndEmail() {
+        var processId = UUID.randomUUID();
+        var email = "voter@example.com";
+        repository.save(Enrollment.builder()
+                .electoralProcessId(processId)
+                .email(email)
+                .build());
+
+        assertTrue(repository.existsByElectoralProcessIdAndEmail(processId, email));
+        assertFalse(repository.existsByElectoralProcessIdAndEmail(processId, "other@example.com"));
+        assertFalse(repository.existsByElectoralProcessIdAndEmail(UUID.randomUUID(), email));
     }
 }

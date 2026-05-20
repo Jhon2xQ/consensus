@@ -55,6 +55,16 @@ public class JpaEnrollmentRepositoryAdapter implements EnrollmentRepository {
     }
 
     @Override
+    public Optional<Enrollment> findByElectoralProcessIdAndEmail(UUID electoralProcessId, String email) {
+        return jpaRepository.findByElectoralProcessIdAndEmail(electoralProcessId, email);
+    }
+
+    @Override
+    public boolean existsByElectoralProcessIdAndEmail(UUID electoralProcessId, String email) {
+        return jpaRepository.existsByElectoralProcessIdAndEmail(electoralProcessId, email);
+    }
+
+    @Override
     public long countByElectoralProcessId(UUID electoralProcessId) {
         return jpaRepository.countByElectoralProcessId(electoralProcessId);
     }
