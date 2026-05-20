@@ -174,7 +174,7 @@ class SecurityConfigTest {
     }
 
     // ──────────────────────────────────────────────
-    // Enrollment endpoints (requires user role)
+    // Enrollment POST (creator role — changed from user)
     // ──────────────────────────────────────────────
 
     @Test
@@ -187,9 +187,42 @@ class SecurityConfigTest {
     }
 
     @Test
-    @DisplayName("POST /private/processes/{processId}/enrollments should return 200 with user role")
+    @DisplayName("POST /private/processes/{processId}/enrollments should return 403 with user role")
     void protectedPostEnrollmentsWithUserRole() throws Exception {
         mockMvc.perform(post("/private/processes/{processId}/enrollments", UUID.randomUUID())
+                        .contentType("application/json")
+                        .content("{}")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_user"))))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("POST /private/processes/{processId}/enrollments should return 200 with creator role")
+    void protectedPostEnrollmentsWithCreatorRole() throws Exception {
+        mockMvc.perform(post("/private/processes/{processId}/enrollments", UUID.randomUUID())
+                        .contentType("application/json")
+                        .content("{}")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_creator"))))
+                .andExpect(status().isOk());
+    }
+
+    // ──────────────────────────────────────────────
+    // Enrollment PUT /private/enrollments/{id}/commitment (user role — NEW)
+    // ──────────────────────────────────────────────
+
+    @Test
+    @DisplayName("PUT /private/enrollments/{id}/commitment should return 401 without token")
+    void protectedPutClaimEnrollmentWithoutToken() throws Exception {
+        mockMvc.perform(put("/private/enrollments/{id}/commitment", UUID.randomUUID())
+                        .contentType("application/json")
+                        .content("{}"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("PUT /private/enrollments/{id}/commitment should return 200 with user role")
+    void protectedPutClaimEnrollmentWithUserRole() throws Exception {
+        mockMvc.perform(put("/private/enrollments/{id}/commitment", UUID.randomUUID())
                         .contentType("application/json")
                         .content("{}")
                         .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_user"))))
@@ -197,14 +230,18 @@ class SecurityConfigTest {
     }
 
     @Test
-    @DisplayName("POST /private/processes/{processId}/enrollments should return 403 with creator role")
-    void protectedPostEnrollmentsWithCreatorRole() throws Exception {
-        mockMvc.perform(post("/private/processes/{processId}/enrollments", UUID.randomUUID())
+    @DisplayName("PUT /private/enrollments/{id}/commitment should return 403 with creator role")
+    void protectedPutClaimEnrollmentWithCreatorRole() throws Exception {
+        mockMvc.perform(put("/private/enrollments/{id}/commitment", UUID.randomUUID())
                         .contentType("application/json")
                         .content("{}")
                         .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_creator"))))
                 .andExpect(status().isForbidden());
     }
+
+    // ──────────────────────────────────────────────
+    // Enrollment GET (user role — unchanged)
+    // ──────────────────────────────────────────────
 
     @Test
     @DisplayName("GET /private/processes/{processId}/enrollments should return 401 without token")

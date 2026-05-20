@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -82,15 +83,14 @@ class CreateEnrollmentUseCaseTest {
     }
 
     @Test
-    @DisplayName("Should create enrollment when process is in COMMITMENT state")
-    void shouldCreateEnrollmentWhenProcessInCommitment() {
+    @DisplayName("Should create enrollment with email only in creator phase when process is in COMMITMENT")
+    void shouldCreateEnrollmentWithEmailWhenProcessInCommitment() {
         var now = Instant.now();
         var process = createProcess(now, ProcessStatus.COMMITMENT);
         var processId = process.getId();
         var request = CreateEnrollmentRequest.builder()
                 .electoralProcessId(processId)
-                .userId("user-123")
-                .commitment("1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+                .email("voter@example.com")
                 .build();
 
         var entity = new Enrollment();
@@ -101,16 +101,13 @@ class CreateEnrollmentUseCaseTest {
         var expectedResponse = EnrollmentResponse.builder()
                 .id(savedEntity.getId())
                 .electoralProcessId(processId)
-                .userId("user-123")
-                .commitment("1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+                .email("voter@example.com")
                 .hasVoted(false)
                 .build();
 
         when(electoralProcessRepository.findById(processId))
                 .thenReturn(Optional.of(process));
-        when(enrollmentRepository.existsByElectoralProcessIdAndUserId(processId, "user-123"))
-                .thenReturn(false);
-        when(enrollmentRepository.existsByElectoralProcessIdAndCommitment(processId, "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"))
+        when(enrollmentRepository.existsByElectoralProcessIdAndEmail(processId, "voter@example.com"))
                 .thenReturn(false);
         when(mapper.toEntity(request)).thenReturn(entity);
         when(enrollmentRepository.save(entity)).thenReturn(savedEntity);
@@ -119,42 +116,66 @@ class CreateEnrollmentUseCaseTest {
         var result = useCase.execute(request);
 
         assertNotNull(result);
-        assertEquals("user-123", result.getUserId());
+        assertEquals("voter@example.com", result.getEmail());
         assertEquals(processId, result.getElectoralProcessId());
+        assertNull(result.getUserId());
+        assertNull(result.getCommitment());
         assertFalse(result.isHasVoted());
+
         verify(electoralProcessRepository).findById(processId);
-        verify(enrollmentRepository).existsByElectoralProcessIdAndUserId(processId, "user-123");
-        verify(enrollmentRepository).existsByElectoralProcessIdAndCommitment(processId, request.getCommitment());
+        verify(enrollmentRepository).existsByElectoralProcessIdAndEmail(processId, "voter@example.com");
+        verify(enrollmentRepository, never()).existsByElectoralProcessIdAndCommitment(any(), any());
         verify(mapper).toEntity(request);
         verify(enrollmentRepository).save(entity);
         verify(mapper).toResponse(savedEntity);
     }
 
     @Test
-    @DisplayName("Should create enrollment when process is in NONE state")
+    @DisplayName("Should create enrollment with email when process is in NONE state")
     void shouldCreateEnrollmentWhenProcessInNone() {
         var now = Instant.now();
         var process = createProcess(now, ProcessStatus.NONE);
         var processId = process.getId();
         var request = CreateEnrollmentRequest.builder()
                 .electoralProcessId(processId)
-                .userId("user-456")
-                .commitment("2222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222")
+                .email("another@example.com")
                 .build();
 
         when(electoralProcessRepository.findById(processId))
                 .thenReturn(Optional.of(process));
-        when(enrollmentRepository.existsByElectoralProcessIdAndUserId(processId, "user-456"))
-                .thenReturn(false);
-        when(enrollmentRepository.existsByElectoralProcessIdAndCommitment(processId, "2222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222"))
+        when(enrollmentRepository.existsByElectoralProcessIdAndEmail(processId, "another@example.com"))
                 .thenReturn(false);
         when(mapper.toEntity(request)).thenReturn(new Enrollment());
         when(enrollmentRepository.save(any())).thenReturn(new Enrollment());
         when(mapper.toResponse(any())).thenReturn(
-                EnrollmentResponse.builder().userId("user-456").build());
+                EnrollmentResponse.builder().email("another@example.com").build());
 
         var result = useCase.execute(request);
-        assertEquals("user-456", result.getUserId());
+        assertEquals("another@example.com", result.getEmail());
+    }
+
+    @Test
+    @DisplayName("Should throw 409 when duplicate email exists in same process")
+    void shouldThrow409WhenDuplicateEmail() {
+        var now = Instant.now();
+        var process = createProcess(now, ProcessStatus.COMMITMENT);
+        var processId = process.getId();
+        var request = CreateEnrollmentRequest.builder()
+                .electoralProcessId(processId)
+                .email("duplicate@example.com")
+                .build();
+
+        when(electoralProcessRepository.findById(processId))
+                .thenReturn(Optional.of(process));
+        when(enrollmentRepository.existsByElectoralProcessIdAndEmail(processId, "duplicate@example.com"))
+                .thenReturn(true);
+
+        var exception = assertThrows(EnrollmentException.class,
+                () -> useCase.execute(request));
+
+        assertTrue(exception.getMessage().contains("already registered"));
+        assertEquals(409, exception.getStatusCode());
+        verify(enrollmentRepository, never()).save(any());
     }
 
     @Test
@@ -163,8 +184,7 @@ class CreateEnrollmentUseCaseTest {
         var processId = UUID.randomUUID();
         var request = CreateEnrollmentRequest.builder()
                 .electoralProcessId(processId)
-                .userId("user-123")
-                .commitment("1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+                .email("voter@example.com")
                 .build();
 
         when(electoralProcessRepository.findById(processId))
@@ -185,8 +205,7 @@ class CreateEnrollmentUseCaseTest {
         var processId = process.getId();
         var request = CreateEnrollmentRequest.builder()
                 .electoralProcessId(processId)
-                .userId("user-123")
-                .commitment("1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+                .email("voter@example.com")
                 .build();
 
         when(electoralProcessRepository.findById(processId))
@@ -208,8 +227,7 @@ class CreateEnrollmentUseCaseTest {
         var processId = process.getId();
         var request = CreateEnrollmentRequest.builder()
                 .electoralProcessId(processId)
-                .userId("user-123")
-                .commitment("1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+                .email("voter@example.com")
                 .build();
 
         when(electoralProcessRepository.findById(processId))
@@ -223,31 +241,6 @@ class CreateEnrollmentUseCaseTest {
     }
 
     @Test
-    @DisplayName("Should throw 409 when user already enrolled in process")
-    void shouldThrow409WhenDuplicateUser() {
-        var now = Instant.now();
-        var process = createProcess(now, ProcessStatus.COMMITMENT);
-        var processId = process.getId();
-        var request = CreateEnrollmentRequest.builder()
-                .electoralProcessId(processId)
-                .userId("user-123")
-                .commitment("1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
-                .build();
-
-        when(electoralProcessRepository.findById(processId))
-                .thenReturn(Optional.of(process));
-        when(enrollmentRepository.existsByElectoralProcessIdAndUserId(processId, "user-123"))
-                .thenReturn(true);
-
-        var exception = assertThrows(EnrollmentException.class,
-                () -> useCase.execute(request));
-
-        assertTrue(exception.getMessage().contains("already exists"));
-        assertEquals(409, exception.getStatusCode());
-        verify(enrollmentRepository, never()).save(any());
-    }
-
-    @Test
     @DisplayName("Should throw 409 when commitment already exists in process")
     void shouldThrow409WhenDuplicateCommitment() {
         var now = Instant.now();
@@ -255,15 +248,17 @@ class CreateEnrollmentUseCaseTest {
         var processId = process.getId();
         var request = CreateEnrollmentRequest.builder()
                 .electoralProcessId(processId)
+                .email("voter@example.com")
                 .userId("user-123")
                 .commitment("1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
                 .build();
 
         when(electoralProcessRepository.findById(processId))
                 .thenReturn(Optional.of(process));
-        when(enrollmentRepository.existsByElectoralProcessIdAndUserId(processId, "user-123"))
+        when(enrollmentRepository.existsByElectoralProcessIdAndEmail(processId, "voter@example.com"))
                 .thenReturn(false);
-        when(enrollmentRepository.existsByElectoralProcessIdAndCommitment(processId, "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"))
+        when(enrollmentRepository.existsByElectoralProcessIdAndCommitment(processId,
+                "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"))
                 .thenReturn(true);
 
         var exception = assertThrows(EnrollmentException.class,
@@ -272,5 +267,35 @@ class CreateEnrollmentUseCaseTest {
         assertTrue(exception.getMessage().contains("commitment"));
         assertEquals(409, exception.getStatusCode());
         verify(enrollmentRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Should NOT check commitment uniqueness when commitment is null")
+    void shouldNotCheckCommitmentUniquenessWhenCommitmentIsNull() {
+        var now = Instant.now();
+        var process = createProcess(now, ProcessStatus.COMMITMENT);
+        var processId = process.getId();
+        var request = CreateEnrollmentRequest.builder()
+                .electoralProcessId(processId)
+                .email("voter@example.com")
+                .build();
+
+        var entity = new Enrollment();
+        var savedEntity = new Enrollment();
+        savedEntity.setId(UUID.randomUUID());
+
+        when(electoralProcessRepository.findById(processId))
+                .thenReturn(Optional.of(process));
+        when(enrollmentRepository.existsByElectoralProcessIdAndEmail(processId, "voter@example.com"))
+                .thenReturn(false);
+        when(mapper.toEntity(request)).thenReturn(entity);
+        when(enrollmentRepository.save(entity)).thenReturn(savedEntity);
+        when(mapper.toResponse(savedEntity)).thenReturn(
+                EnrollmentResponse.builder().email("voter@example.com").build());
+
+        var result = useCase.execute(request);
+
+        assertEquals("voter@example.com", result.getEmail());
+        verify(enrollmentRepository, never()).existsByElectoralProcessIdAndCommitment(any(), any());
     }
 }

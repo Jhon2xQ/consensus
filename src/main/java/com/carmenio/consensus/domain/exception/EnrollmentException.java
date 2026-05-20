@@ -47,4 +47,8 @@ public class EnrollmentException extends DomainException {
     public static EnrollmentException missingJwtClaims() {
         return new EnrollmentException("Missing required claims in JWT", 401);
     }
+
+    public static EnrollmentException processIdMismatch() {
+        return new EnrollmentException("Enrollment does not belong to the specified process", 404);
+    }
 }

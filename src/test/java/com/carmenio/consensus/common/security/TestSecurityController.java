@@ -104,6 +104,11 @@ public class TestSecurityController {
         return ResponseEntity.ok(ApiResponse.success("ok"));
     }
 
+    @PutMapping("/private/enrollments/{id}/commitment")
+    public ResponseEntity<ApiResponse<String>> claimEnrollment(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.success("ok"));
+    }
+
     @GetMapping("/private/enrollments/{id}")
     public ResponseEntity<ApiResponse<String>> getEnrollment(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.success("ok"));

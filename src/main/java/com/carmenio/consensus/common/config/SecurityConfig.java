@@ -75,8 +75,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // ── Enrollment endpoints (most specific first) ──
                 .requestMatchers(HttpMethod.GET, "/private/processes/*/enrollments/**").hasRole("user")
-                .requestMatchers(HttpMethod.POST, "/private/processes/*/enrollments/**").hasRole("user")
+                .requestMatchers(HttpMethod.PUT, "/private/enrollments/{id}/commitment").hasRole("user")
                 .requestMatchers(HttpMethod.GET, "/private/enrollments/{id}").hasRole("user")
+                .requestMatchers(HttpMethod.POST, "/private/processes/*/enrollments/**").hasRole("creator")
                 // ── Creator-only: process and team mutations ──
                 .requestMatchers(HttpMethod.POST, "/private/processes/**").hasRole("creator")
                 .requestMatchers(HttpMethod.PUT, "/private/processes/**").hasRole("creator")
