@@ -40,6 +40,7 @@ class JpaElectoralProcessRepositoryAdapterTest {
         sampleProcess = ElectoralProcess.builder()
                 .name("Presidential Election 2026")
                 .scope("presidential-2026")
+                .createdBy("test-user")
                 .commitmentStart(Instant.parse("2026-06-01T00:00:00Z"))
                 .commitmentEnd(Instant.parse("2026-06-10T00:00:00Z"))
                 .votingStart(Instant.parse("2026-07-01T00:00:00Z"))
@@ -110,6 +111,7 @@ class JpaElectoralProcessRepositoryAdapterTest {
             repository.save(ElectoralProcess.builder()
                     .name("Process " + i)
                     .scope("scope-" + i)
+                    .createdBy("test-user")
                     .commitmentStart(Instant.parse("2026-06-01T00:00:00Z"))
                     .commitmentEnd(Instant.parse("2026-06-10T00:00:00Z"))
                     .votingStart(Instant.parse("2026-07-01T00:00:00Z"))
@@ -145,6 +147,7 @@ class JpaElectoralProcessRepositoryAdapterTest {
         var duplicate = ElectoralProcess.builder()
                 .name("Presidential Election 2026")  // same name
                 .scope("different-scope")
+                .createdBy("test-user")
                 .commitmentStart(Instant.parse("2026-06-01T00:00:00Z"))
                 .commitmentEnd(Instant.parse("2026-06-10T00:00:00Z"))
                 .votingStart(Instant.parse("2026-07-01T00:00:00Z"))
@@ -165,6 +168,7 @@ class JpaElectoralProcessRepositoryAdapterTest {
         var duplicate = ElectoralProcess.builder()
                 .name("Different Process")
                 .scope("presidential-2026")  // same scope
+                .createdBy("test-user")
                 .commitmentStart(Instant.parse("2026-06-01T00:00:00Z"))
                 .commitmentEnd(Instant.parse("2026-06-10T00:00:00Z"))
                 .votingStart(Instant.parse("2026-07-01T00:00:00Z"))

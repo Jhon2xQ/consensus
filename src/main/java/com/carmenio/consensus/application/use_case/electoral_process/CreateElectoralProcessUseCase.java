@@ -29,11 +29,12 @@ public class CreateElectoralProcessUseCase {
     /**
      * Creates a new electoral process.
      *
-     * @param request the creation payload with name, scope, and dates
+     * @param request   the creation payload with name, scope, and dates
+     * @param createdBy the user ID from the JWT sub claim
      * @return the created process as a response DTO
      * @throws ElectoralProcessException if name or scope already exist
      */
-    public ElectoralProcessResponse execute(CreateElectoralProcessRequest request) {
+    public ElectoralProcessResponse execute(CreateElectoralProcessRequest request, String createdBy) {
         if (repository.existsByName(request.getName())) {
             throw ElectoralProcessException.alreadyExists("name \"" + request.getName() + "\"");
         }
@@ -42,6 +43,7 @@ public class CreateElectoralProcessUseCase {
         }
 
         var entity = mapper.toEntity(request);
+        entity.setCreatedBy(createdBy);
         var saved = repository.save(entity);
 
         // Auto-transition estatus based on current dates

@@ -62,6 +62,9 @@ public class ElectoralProcess {
     private Instant results;
 
     @Column(nullable = false, updatable = false)
+    private String createdBy;
+
+    @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
     @Column(nullable = false)

@@ -49,4 +49,9 @@ public interface ElectoralProcessRepository {
      * Returns whether a process with the given scope exists.
      */
     boolean existsByScope(String scope);
+
+    /**
+     * Returns a paginated list of processes created by the given user ID.
+     */
+    Page<ElectoralProcess> findByCreatedBy(String createdBy, Pageable pageable);
 }

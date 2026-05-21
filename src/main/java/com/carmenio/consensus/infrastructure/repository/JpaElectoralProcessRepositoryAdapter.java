@@ -54,4 +54,9 @@ public class JpaElectoralProcessRepositoryAdapter implements ElectoralProcessRep
     public boolean existsByScope(String scope) {
         return jpaRepository.existsByScope(scope);
     }
+
+    @Override
+    public Page<ElectoralProcess> findByCreatedBy(String createdBy, Pageable pageable) {
+        return jpaRepository.findByCreatedBy(createdBy, pageable);
+    }
 }

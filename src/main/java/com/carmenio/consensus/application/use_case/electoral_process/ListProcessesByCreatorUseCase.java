@@ -1,7 +1,7 @@
 package com.carmenio.consensus.application.use_case.electoral_process;
 
-import com.carmenio.consensus.application.dto.electoral_process.ElectoralProcessResponse;
 import com.carmenio.consensus.application.dto.PaginatedResponse;
+import com.carmenio.consensus.application.dto.electoral_process.ElectoralProcessResponse;
 import com.carmenio.consensus.application.util.ProcessStateCalculator;
 import com.carmenio.consensus.domain.repository.ElectoralProcessRepository;
 import com.carmenio.consensus.infrastructure.mapper.ElectoralProcessMapper;
@@ -13,28 +13,29 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 
 /**
- * Use case for listing electoral processes with pagination.
+ * Use case for listing electoral processes created by a specific user.
  * <p>
- * Calls {@link ProcessStateCalculator#transitionState} on each entity
- * to ensure all responses contain fresh computed estatus values.
+ * Filters by {@code createdBy} field matching the JWT {@code sub} claim,
+ * returns a paginated response with fresh computed estatus values.
  */
 @Component
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class ListElectoralProcessesUseCase {
+public class ListProcessesByCreatorUseCase {
 
     private final ElectoralProcessRepository repository;
     private final ElectoralProcessMapper mapper;
 
     /**
-     * Returns a paginated list of all electoral processes.
+     * Returns a paginated list of electoral processes created by the given user.
      *
-     * @param pageable pagination parameters
+     * @param createdBy the user ID (JWT sub) to filter by
+     * @param pageable  pagination parameters
      * @return paginated response with process DTOs
      */
-    public PaginatedResponse<ElectoralProcessResponse> execute(Pageable pageable) {
+    public PaginatedResponse<ElectoralProcessResponse> execute(String createdBy, Pageable pageable) {
         var now = Instant.now();
-        var page = repository.findAll(pageable);
+        var page = repository.findByCreatedBy(createdBy, pageable);
         var content = page.getContent().stream()
                 .map(entity -> {
                     ProcessStateCalculator.transitionState(entity, now);

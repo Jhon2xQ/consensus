@@ -5,7 +5,9 @@ import com.carmenio.consensus.application.dto.electoral_process.ElectoralProcess
 import com.carmenio.consensus.application.dto.electoral_process.UpdateElectoralProcessRequest;
 import com.carmenio.consensus.application.use_case.electoral_process.CreateElectoralProcessUseCase;
 import com.carmenio.consensus.application.use_case.electoral_process.DeleteElectoralProcessUseCase;
+import com.carmenio.consensus.application.use_case.electoral_process.ListProcessesByCreatorUseCase;
 import com.carmenio.consensus.application.use_case.electoral_process.UpdateElectoralProcessUseCase;
+import com.carmenio.consensus.application.util.JwtClaimExtractor;
 import com.carmenio.consensus.domain.exception.ElectoralProcessException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,6 +24,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -47,6 +50,12 @@ class ElectoralProcessPrivateControllerTest {
     @MockitoBean
     private DeleteElectoralProcessUseCase deleteUseCase;
 
+    @MockitoBean
+    private ListProcessesByCreatorUseCase listUseCase;
+
+    @MockitoBean
+    private JwtClaimExtractor jwtClaimExtractor;
+
     @Test
     @DisplayName("POST /private/processes should return 200 with created process")
     void shouldCreateProcess() throws Exception {
@@ -67,7 +76,8 @@ class ElectoralProcessPrivateControllerTest {
                 .scope("test-scope")
                 .build();
 
-        when(createUseCase.execute(any())).thenReturn(response);
+        when(jwtClaimExtractor.extractUserId(any())).thenReturn("test-user");
+        when(createUseCase.execute(any(), anyString())).thenReturn(response);
 
         mockMvc.perform(post("/private/processes")
                         .contentType(MediaType.APPLICATION_JSON)

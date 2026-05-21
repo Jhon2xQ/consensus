@@ -1,6 +1,8 @@
 package com.carmenio.consensus.infrastructure.repository;
 
 import com.carmenio.consensus.domain.entity.ElectoralProcess;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -22,4 +24,6 @@ interface JpaElectoralProcessRepository extends JpaRepository<ElectoralProcess, 
     boolean existsByName(String name);
 
     boolean existsByScope(String scope);
+
+    Page<ElectoralProcess> findByCreatedBy(String createdBy, Pageable pageable);
 }

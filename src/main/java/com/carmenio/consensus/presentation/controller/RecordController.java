@@ -1,33 +1,31 @@
 package com.carmenio.consensus.presentation.controller;
 
 import com.carmenio.consensus.application.dto.record.CreateVoteRecordRequest;
-import com.carmenio.consensus.application.dto.record.ProcessResultsResponse;
 import com.carmenio.consensus.application.dto.record.VoteRecordResponse;
 import com.carmenio.consensus.application.use_case.record.CreateVoteRecordUseCase;
-import com.carmenio.consensus.application.use_case.record.GetProcessResultsUseCase;
+import com.carmenio.consensus.application.use_case.record.ListVoteRecordsUseCase;
 import com.carmenio.consensus.presentation.middleware.ApiResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
-
 /**
- * REST controller for vote record ingestion and process results.
+ * REST controller for vote record ingestion and listing.
  * <p>
- * Records are consumed by the Semaphore Relayer after on-chain proof validation.
- * Results are calculated in real-time and only available for CLOSED processes.
- * No authentication required — these are public endpoints.
+ * POST records are consumed by the Semaphore Relayer after on-chain proof
+ * validation (exempt from authentication).
+ * GET listing requires any authenticated user.
  */
 @RestController
-@RequestMapping("/public")
+@RequestMapping("/private")
 @RequiredArgsConstructor
 public class RecordController {
 
     private final CreateVoteRecordUseCase createVoteRecordUseCase;
-    private final GetProcessResultsUseCase getProcessResultsUseCase;
+    private final ListVoteRecordsUseCase listVoteRecordsUseCase;
 
     /**
      * Ingests a validated vote record from the Semaphore Relayer.
@@ -43,16 +41,21 @@ public class RecordController {
     }
 
     /**
-     * Retrieves the results of an electoral process.
-     * Results are only available when the process is in CLOSED state.
+     * Lists vote records, optionally filtered by scope.
      *
-     * @param id the UUID of the electoral process
-     * @return the process results with per-team vote tallies
+     * @param scope    optional scope filter (triggers non-paginated full listing)
+     * @param pageable pagination parameters (ignored when scope is present)
+     * @return paginated or full list of vote records wrapped in ApiResponse
      */
-    @GetMapping("/processes/{id}/results")
-    public ResponseEntity<ApiResponse<ProcessResultsResponse>> getResults(
-            @PathVariable UUID id) {
-        var response = getProcessResultsUseCase.execute(id);
-        return ResponseEntity.ok(ApiResponse.success(response));
+    @GetMapping("/records")
+    public ResponseEntity<ApiResponse<?>> listRecords(
+            @RequestParam(required = false) String scope,
+            Pageable pageable) {
+        if (scope != null && !scope.isBlank()) {
+            return ResponseEntity.ok(ApiResponse.success(
+                    listVoteRecordsUseCase.executeByScope(scope)));
+        }
+        return ResponseEntity.ok(ApiResponse.success(
+                listVoteRecordsUseCase.executePaginated(pageable)));
     }
 }

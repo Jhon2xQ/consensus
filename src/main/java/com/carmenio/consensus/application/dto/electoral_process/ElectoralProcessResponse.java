@@ -20,6 +20,7 @@ public class ElectoralProcessResponse {
     private String name;
     private String scope;
     private String description;
+    private String createdBy;
     private ProcessStatus estatus;
     private Instant commitmentStart;
     private Instant commitmentEnd;

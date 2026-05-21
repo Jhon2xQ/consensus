@@ -81,6 +81,7 @@ public class ElectoralProcessMapper {
                 .name(entity.getName())
                 .scope(entity.getScope())
                 .description(entity.getDescription())
+                .createdBy(entity.getCreatedBy())
                 .estatus(computedStatus)
                 .commitmentStart(entity.getCommitmentStart())
                 .commitmentEnd(entity.getCommitmentEnd())

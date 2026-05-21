@@ -3,6 +3,8 @@ package com.carmenio.consensus.infrastructure.repository;
 import com.carmenio.consensus.domain.entity.VoteRecord;
 import com.carmenio.consensus.domain.repository.VoteRecordRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -57,5 +59,10 @@ public class JpaVoteRecordRepositoryAdapter implements VoteRecordRepository {
     @Override
     public long countByScope(String scope) {
         return jpaRepository.countByScope(scope);
+    }
+
+    @Override
+    public Page<VoteRecord> findAll(Pageable pageable) {
+        return jpaRepository.findAll(pageable);
     }
 }

@@ -1,4 +1,4 @@
-package com.carmenio.consensus.application.dto.electoral_process;
+package com.carmenio.consensus.application.dto;
 
 import lombok.*;
 

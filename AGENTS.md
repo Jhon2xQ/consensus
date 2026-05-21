@@ -310,7 +310,7 @@ Cada archivo incluye: parámetros, estructura de request/response, y códigos de
 | ElectoralProcess | [`docs/ELECTORAL_PROCESS_API_DOC.md`](docs/ELECTORAL_PROCESS_API_DOC.md) | CRUD + estado + listado paginado, públicos y privados |
 | Team             | [`docs/TEAM_API_DOC.md`](docs/TEAM_API_DOC.md)                           | CRUD completo, públicos y privados |
 | Enrollment       | [`docs/ENROLLMENT_API_DOC.md`](docs/ENROLLMENT_API_DOC.md)               | Crear, listar, obtener por ID (privado) |
-| Record (votos)   | [`docs/RECORD_API_DOC.md`](docs/RECORD_API_DOC.md)                       | Ingresar voto + resultados (público) |
+| Record (votos)   | [`docs/RECORD_API_DOC.md`](docs/RECORD_API_DOC.md)                       | Ingresar voto + listado de registros |
 
 ### 9.1 Reglas para Documentación de API
 
@@ -347,10 +347,11 @@ La API utiliza **Logto** como Identity Provider con OAuth2 Resource Server + JWT
 |--------|--------|--------|---------------|
 | `/api/public/processes/**` | GET | ❌ Público | — |
 | `/api/public/teams/**` | GET | ❌ Público | — |
-| `/api/public/processes/{id}/results` | GET | ❌ Público | — |
-| `/api/public/records` | POST | ➖ Exento | Semaphore Relayer |
+| `/api/private/processes/**` | GET | ✅ Protegido | `consensus-creator` |
 | `/api/private/processes/**` | POST, PUT, DELETE | ✅ Protegido | `consensus-creator` |
 | `/api/private/teams/**` | POST, PUT, DELETE | ✅ Protegido | `consensus-creator` |
+| `/api/private/records` | POST | ➖ Exento | Semaphore Relayer |
+| `/api/private/records/**` | GET | ✅ Protegido | Autenticado |
 | `/api/private/processes/{processId}/enrollments` | POST | ✅ Protegido | `consensus-creator` |
 | `/api/private/processes/{processId}/enrollments` | GET | ✅ Protegido | Autenticado |
 | `/api/private/enrollments/{id}` | GET | ✅ Protegido | Autenticado |
@@ -403,7 +404,7 @@ El `JwtAuthenticationConverter` en `SecurityConfig` mapea cada rol a `ROLE_<role
 
 ## 11. Integración Semaphore
 
-El Semaphore Relayer (microservicio Node/Bun) escucha eventos `ProofValidated` on-chain y consume `POST /api/private/records` para persistir votos.
+El Semaphore Relayer (microservicio Node/Bun) escucha eventos `ProofValidated` on-chain y consume `POST /api/private/records` para persistir votos. Este endpoint está exento de autenticación.
 
 **Evento esperado**:
 

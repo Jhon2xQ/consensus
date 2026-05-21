@@ -1,7 +1,7 @@
 package com.carmenio.consensus.presentation.controller;
 
 import com.carmenio.consensus.application.dto.electoral_process.ElectoralProcessResponse;
-import com.carmenio.consensus.application.dto.electoral_process.PaginatedResponse;
+import com.carmenio.consensus.application.dto.PaginatedResponse;
 import com.carmenio.consensus.application.dto.electoral_process.ProcessStateResponse;
 import com.carmenio.consensus.application.use_case.electoral_process.FindElectoralProcessByIdUseCase;
 import com.carmenio.consensus.application.use_case.electoral_process.GetProcessStateUseCase;

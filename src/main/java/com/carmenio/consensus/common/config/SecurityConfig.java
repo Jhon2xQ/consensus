@@ -32,7 +32,9 @@ import java.util.List;
  *
  * <h3>Route matrix</h3>
  * <ul>
- *   <li>{@code /public/**} — open access (GET processes, teams, results; POST records)</li>
+ *   <li>{@code /public/**} — open access (GET processes, teams)</li>
+ *   <li>{@code /private/records} POST — exempt (Semaphore Relayer)</li>
+ *   <li>{@code /private/records/**} GET — authenticated</li>
  *   <li>{@code /private/processes/**} POST, PUT, DELETE — {@code consensus-creator} role</li>
  *   <li>{@code /private/teams/**} POST, PUT, DELETE — {@code consensus-creator} role</li>
  *   <li>{@code /private/**} enrollment GET endpoints — authenticated</li>
@@ -82,12 +84,16 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/private/processes/*/enrollments/**").hasRole("consensus-creator")
                 .requestMatchers(HttpMethod.DELETE, "/private/enrollments/{id}").hasRole("consensus-creator")
                 // ── Creator-only: process and team mutations ──
+                .requestMatchers(HttpMethod.GET, "/private/processes/**").hasRole("consensus-creator")
                 .requestMatchers(HttpMethod.POST, "/private/processes/**").hasRole("consensus-creator")
                 .requestMatchers(HttpMethod.PUT, "/private/processes/**").hasRole("consensus-creator")
                 .requestMatchers(HttpMethod.DELETE, "/private/processes/**").hasRole("consensus-creator")
                 .requestMatchers(HttpMethod.POST, "/private/teams/**").hasRole("consensus-creator")
                 .requestMatchers(HttpMethod.PUT, "/private/teams/**").hasRole("consensus-creator")
                 .requestMatchers(HttpMethod.DELETE, "/private/teams/**").hasRole("consensus-creator")
+                // ── Records (POST exempt for Relayer; GET requires any authenticated user) ──
+                .requestMatchers(HttpMethod.POST, "/private/records").permitAll()
+                .requestMatchers(HttpMethod.GET, "/private/records/**").authenticated()
                 // ── Public endpoints ──
                 .requestMatchers("/public/**").permitAll()
                 // ── Fallback: all other requests require auth ──
