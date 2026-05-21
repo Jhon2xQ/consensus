@@ -2,21 +2,24 @@ package com.carmenio.consensus.application.use_case.electoral_process;
 
 import com.carmenio.consensus.application.dto.PaginatedResponse;
 import com.carmenio.consensus.application.dto.electoral_process.ElectoralProcessResponse;
+import com.carmenio.consensus.application.util.JwtClaimExtractor;
 import com.carmenio.consensus.application.util.ProcessStateCalculator;
 import com.carmenio.consensus.domain.repository.ElectoralProcessRepository;
 import com.carmenio.consensus.infrastructure.mapper.ElectoralProcessMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
 /**
- * Use case for listing electoral processes created by a specific user.
+ * Use case for listing electoral processes created by the authenticated user.
  * <p>
- * Filters by {@code createdBy} field matching the JWT {@code sub} claim,
- * returns a paginated response with fresh computed estatus values.
+ * Extracts the user ID from the JWT {@code sub} claim, filters by
+ * {@code createdBy}, and returns a paginated response with fresh computed
+ * estatus values.
  */
 @Component
 @RequiredArgsConstructor
@@ -25,15 +28,19 @@ public class ListProcessesByCreatorUseCase {
 
     private final ElectoralProcessRepository repository;
     private final ElectoralProcessMapper mapper;
+    private final JwtClaimExtractor jwtClaimExtractor;
 
     /**
-     * Returns a paginated list of electoral processes created by the given user.
+     * Returns a paginated list of electoral processes created by the
+     * authenticated user.
      *
-     * @param createdBy the user ID (JWT sub) to filter by
-     * @param pageable  pagination parameters
+     * @param jwt      the authenticated JWT from the request
+     * @param pageable pagination parameters
      * @return paginated response with process DTOs
+     * @throws org.springframework.security.authentication.BadCredentialsException if the sub claim is missing (401)
      */
-    public PaginatedResponse<ElectoralProcessResponse> execute(String createdBy, Pageable pageable) {
+    public PaginatedResponse<ElectoralProcessResponse> execute(Jwt jwt, Pageable pageable) {
+        var createdBy = jwtClaimExtractor.extractUserId(jwt);
         var now = Instant.now();
         var page = repository.findByCreatedBy(createdBy, pageable);
         var content = page.getContent().stream()

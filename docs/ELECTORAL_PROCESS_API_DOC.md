@@ -13,9 +13,9 @@ Base path (private): `/api/private/processes`
 | GET | `/api/public/processes/{id}` | ❌ Público | — |
 | GET | `/api/public/processes/{id}/state` | ❌ Público | — |
 | GET | `/api/private/processes` | ✅ Bearer JWT | `consensus-creator` |
-| POST | `/api/private/processes` | ✅ Bearer JWT | `creator` |
-| PUT | `/api/private/processes/{id}` | ✅ Bearer JWT | `creator` |
-| DELETE | `/api/private/processes/{id}` | ✅ Bearer JWT | `creator` |
+| POST | `/api/private/processes` | ✅ Bearer JWT | `consensus-creator` |
+| PUT | `/api/private/processes/{id}` | ✅ Bearer JWT | `consensus-creator` |
+| DELETE | `/api/private/processes/{id}` | ✅ Bearer JWT | `consensus-creator` |
 
 Detalle completo debajo.
 
@@ -245,7 +245,7 @@ Lista los procesos electorales creados por el usuario autenticado con paginació
 
 Crea un nuevo proceso electoral.
 
-> **Auth**: ✅ Bearer JWT — Requiere rol `creator`
+> **Auth**: ✅ Bearer JWT — Requiere rol `consensus-creator`
 
 ### Request Body
 
@@ -317,7 +317,7 @@ Crea un nuevo proceso electoral.
 
 Actualiza un proceso electoral existente. Todos los campos son opcionales.
 
-> **Auth**: ✅ Bearer JWT — Requiere rol `creator`
+> **Auth**: ✅ Bearer JWT — Requiere rol `consensus-creator`
 
 ### Parámetros (Path)
 
@@ -325,63 +325,9 @@ Actualiza un proceso electoral existente. Todos los campos son opcionales.
 | ------ | ---- | --------- |
 | `id`   | UUID | Sí        |
 
-### Request Body (todos opcionales)
-
-```
-{
-  "name": "string (opcional)",
-  "description": "string (opcional)",
-  "commitmentStart": "instant (ISO-8601, opcional)",
-  "commitmentEnd": "instant (ISO-8601, opcional)",
-  "votingStart": "instant (ISO-8601, opcional)",
-  "votingEnd": "instant (ISO-8601, opcional)",
-  "results": "instant (ISO-8601, opcional)"
-}
-```
-
-> El `estatus` es gestionado automáticamente por la máquina de estados según las fechas del proceso.
-
-### Respuesta `200 OK`
-
-```
-{
-  "success": true,
-  "message": "Operation successful",
-  "data": {
-    "id": "uuid",
-    "name": "string",
-    "scope": "string",
-    "description": "string | null",
-    "createdBy": "string",
-    "estatus": "NONE | COMMITMENT | VOTING | CLOSED",
-    "commitmentStart": "instant (ISO-8601)",
-    "commitmentEnd": "instant (ISO-8601)",
-    "votingStart": "instant (ISO-8601)",
-    "votingEnd": "instant (ISO-8601)",
-    "results": "instant (ISO-8601)"
-  },
-  "timestamp": 1234567890
-}
-```
-
-### Respuesta `404 Not Found`
-
-```
-{
-  "success": false,
-  "message": "Process not found",
-  "data": null,
-  "timestamp": 1234567890
-}
-```
-
----
-
-## DELETE /api/private/processes/{id} <a name="delete-apiprivateprocessesid-eliminar"></a>
-
 Elimina un proceso electoral. Solo se puede eliminar si no tiene equipos, inscripciones ni registros de voto asociados.
 
-> **Auth**: ✅ Bearer JWT — Requiere rol `creator`
+> **Auth**: ✅ Bearer JWT — Requiere rol `consensus-creator`
 
 ### Parámetros (Path)
 

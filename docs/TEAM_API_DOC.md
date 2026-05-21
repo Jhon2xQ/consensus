@@ -11,9 +11,9 @@ Base path (private): `/api/private`
 |--------|----------|------|-----|
 | GET | `/api/public/processes/{processId}/teams` | ❌ Público | — |
 | GET | `/api/public/teams/{id}` | ❌ Público | — |
-| POST | `/api/private/processes/{processId}/teams` | ✅ Bearer JWT | `creator` |
-| PUT | `/api/private/teams/{id}` | ✅ Bearer JWT | `creator` |
-| DELETE | `/api/private/teams/{id}` | ✅ Bearer JWT | `creator` |
+| POST | `/api/private/processes/{processId}/teams` | ✅ Bearer JWT | `consensus-creator` |
+| PUT | `/api/private/teams/{id}` | ✅ Bearer JWT | `consensus-creator` |
+| DELETE | `/api/private/teams/{id}` | ✅ Bearer JWT | `consensus-creator` |
 
 Detalle completo debajo.
 
@@ -113,7 +113,7 @@ Obtiene un equipo por su ID.
 
 Crea un nuevo equipo dentro de un proceso electoral.
 
-> **Auth**: ✅ Bearer JWT — Requiere rol `creator`
+> **Auth**: ✅ Bearer JWT — Requiere rol `consensus-creator`
 
 ### Parámetros (Path)
 
@@ -176,7 +176,7 @@ Crea un nuevo equipo dentro de un proceso electoral.
 
 Actualiza el nombre y/o avatar de un equipo. Todos los campos son opcionales.
 
-> **Auth**: ✅ Bearer JWT — Requiere rol `creator`
+> **Auth**: ✅ Bearer JWT — Requiere rol `consensus-creator`
 
 ### Parámetros (Path)
 
@@ -226,7 +226,7 @@ Actualiza el nombre y/o avatar de un equipo. Todos los campos son opcionales.
 
 Elimina un equipo por su ID.
 
-> **Auth**: ✅ Bearer JWT — Requiere rol `creator`
+> **Auth**: ✅ Bearer JWT — Requiere rol `consensus-creator`
 
 ### Parámetros (Path)
 

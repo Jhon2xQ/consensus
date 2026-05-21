@@ -1,6 +1,7 @@
 package com.carmenio.consensus.application.use_case.electoral_process;
 
 import com.carmenio.consensus.application.dto.electoral_process.ElectoralProcessResponse;
+import com.carmenio.consensus.application.util.JwtClaimExtractor;
 import com.carmenio.consensus.common.constant.ProcessStatus;
 import com.carmenio.consensus.domain.entity.ElectoralProcess;
 import com.carmenio.consensus.domain.repository.ElectoralProcessRepository;
@@ -14,9 +15,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,8 +35,21 @@ class ListProcessesByCreatorUseCaseTest {
     @Mock
     private ElectoralProcessMapper mapper;
 
+    @Mock
+    private JwtClaimExtractor jwtClaimExtractor;
+
     @InjectMocks
     private ListProcessesByCreatorUseCase useCase;
+
+    private Jwt createJwt(String userId) {
+        return new Jwt(
+                "test-token-value",
+                Instant.now(),
+                Instant.now().plusSeconds(3600),
+                Map.of("alg", "none"),
+                Map.of("sub", userId)
+        );
+    }
 
     @Test
     @DisplayName("should return paginated processes for creator")
@@ -78,7 +94,10 @@ class ListProcessesByCreatorUseCaseTest {
                         .id(entity2.getId()).name("Process B").scope("scope-b")
                         .createdBy(creatorId).estatus(ProcessStatus.NONE).build());
 
-        var response = useCase.execute(creatorId, pageable);
+        var jwt = createJwt(creatorId);
+        when(jwtClaimExtractor.extractUserId(jwt)).thenReturn(creatorId);
+
+        var response = useCase.execute(jwt, pageable);
 
         assertAll("paginated processes for creator",
                 () -> assertNotNull(response),
@@ -102,7 +121,10 @@ class ListProcessesByCreatorUseCaseTest {
 
         when(repository.findByCreatedBy(eq(creatorId), any())).thenReturn(emptyPage);
 
-        var response = useCase.execute(creatorId, pageable);
+        var jwt = createJwt(creatorId);
+        when(jwtClaimExtractor.extractUserId(jwt)).thenReturn(creatorId);
+
+        var response = useCase.execute(jwt, pageable);
 
         assertAll("empty page for creator",
                 () -> assertNotNull(response),
@@ -139,7 +161,10 @@ class ListProcessesByCreatorUseCaseTest {
                         .id(entity.getId()).name("My Process").scope("my-scope")
                         .createdBy(creatorId).estatus(ProcessStatus.NONE).build());
 
-        var response = useCase.execute(creatorId, pageable);
+        var jwt = createJwt(creatorId);
+        when(jwtClaimExtractor.extractUserId(jwt)).thenReturn(creatorId);
+
+        var response = useCase.execute(jwt, pageable);
 
         assertEquals(1, response.getContent().size());
         assertEquals(creatorId, response.getContent().get(0).getCreatedBy());
@@ -172,7 +197,10 @@ class ListProcessesByCreatorUseCaseTest {
                         .id(entity.getId()).name("Stateful Process").scope("state-scope")
                         .createdBy(creatorId).estatus(ProcessStatus.NONE).build());
 
-        var response = useCase.execute(creatorId, pageable);
+        var jwt = createJwt(creatorId);
+        when(jwtClaimExtractor.extractUserId(jwt)).thenReturn(creatorId);
+
+        var response = useCase.execute(jwt, pageable);
 
         assertNotNull(response);
         // Verify transitionState was called by checking getEstatus() on entity

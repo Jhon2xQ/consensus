@@ -6,7 +6,6 @@ import com.carmenio.consensus.application.use_case.electoral_process.CreateElect
 import com.carmenio.consensus.application.use_case.electoral_process.DeleteElectoralProcessUseCase;
 import com.carmenio.consensus.application.use_case.electoral_process.ListProcessesByCreatorUseCase;
 import com.carmenio.consensus.application.use_case.electoral_process.UpdateElectoralProcessUseCase;
-import com.carmenio.consensus.application.util.JwtClaimExtractor;
 import com.carmenio.consensus.common.config.SecurityConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -52,9 +52,6 @@ class ElectoralProcessPrivateControllerSecurityTest {
     @MockitoBean
     private ListProcessesByCreatorUseCase listUseCase;
 
-    @MockitoBean
-    private JwtClaimExtractor jwtClaimExtractor;
-
     @Test
     @DisplayName("should return processes for authenticated creator")
     void shouldReturnProcessesForAuthenticatedCreator() throws Exception {
@@ -71,7 +68,7 @@ class ElectoralProcessPrivateControllerSecurityTest {
                 .totalPages(1)
                 .build();
 
-        when(listUseCase.execute(any(), any())).thenReturn(response);
+        when(listUseCase.execute(any(Jwt.class), any())).thenReturn(response);
 
         mockMvc.perform(get("/private/processes")
                         .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_consensus-creator"))))
@@ -106,7 +103,7 @@ class ElectoralProcessPrivateControllerSecurityTest {
                 .totalPages(0)
                 .build();
 
-        when(listUseCase.execute(any(), any())).thenReturn(response);
+        when(listUseCase.execute(any(Jwt.class), any())).thenReturn(response);
 
         mockMvc.perform(get("/private/processes")
                         .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_consensus-creator"))))

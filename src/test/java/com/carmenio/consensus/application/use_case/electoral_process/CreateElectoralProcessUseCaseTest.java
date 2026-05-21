@@ -2,6 +2,7 @@ package com.carmenio.consensus.application.use_case.electoral_process;
 
 import com.carmenio.consensus.application.dto.electoral_process.CreateElectoralProcessRequest;
 import com.carmenio.consensus.application.dto.electoral_process.ElectoralProcessResponse;
+import com.carmenio.consensus.application.util.JwtClaimExtractor;
 import com.carmenio.consensus.domain.entity.ElectoralProcess;
 import com.carmenio.consensus.domain.exception.ElectoralProcessException;
 import com.carmenio.consensus.domain.repository.ElectoralProcessRepository;
@@ -12,9 +13,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,8 +33,21 @@ class CreateElectoralProcessUseCaseTest {
     @Mock
     private ElectoralProcessMapper mapper;
 
+    @Mock
+    private JwtClaimExtractor jwtClaimExtractor;
+
     @InjectMocks
     private CreateElectoralProcessUseCase useCase;
+
+    private Jwt createJwt(String userId) {
+        return new Jwt(
+                "test-token-value",
+                Instant.now(),
+                Instant.now().plusSeconds(3600),
+                Map.of("alg", "none"),
+                Map.of("sub", userId)
+        );
+    }
 
     @Test
     @DisplayName("should create process when request is valid")
@@ -74,7 +90,10 @@ class CreateElectoralProcessUseCaseTest {
                 .results(now.plusSeconds(14400))
                 .build());
 
-        var response = useCase.execute(request, "user-1");
+        var jwt = createJwt("user-1");
+        when(jwtClaimExtractor.extractUserId(jwt)).thenReturn("user-1");
+
+        var response = useCase.execute(request, jwt);
 
         assertAll("create process",
                 () -> assertNotNull(response),
@@ -119,7 +138,10 @@ class CreateElectoralProcessUseCaseTest {
                 .createdBy("creator-abc")
                 .build());
 
-        var response = useCase.execute(request, "creator-abc");
+        var jwt = createJwt("creator-abc");
+        when(jwtClaimExtractor.extractUserId(jwt)).thenReturn("creator-abc");
+
+        var response = useCase.execute(request, jwt);
 
         assertAll("set createdBy",
                 () -> assertNotNull(response),
@@ -147,7 +169,8 @@ class CreateElectoralProcessUseCaseTest {
 
         when(repository.existsByName("Existing Process")).thenReturn(true);
 
-        var exception = assertThrows(ElectoralProcessException.class, () -> useCase.execute(request, "user-1"));
+        var jwt = createJwt("user-1");
+        var exception = assertThrows(ElectoralProcessException.class, () -> useCase.execute(request, jwt));
         assertTrue(exception.getMessage().contains("already exists"));
         verify(repository, never()).save(any());
     }
@@ -169,7 +192,8 @@ class CreateElectoralProcessUseCaseTest {
         when(repository.existsByName("Unique Name")).thenReturn(false);
         when(repository.existsByScope("existing-scope")).thenReturn(true);
 
-        var exception = assertThrows(ElectoralProcessException.class, () -> useCase.execute(request, "user-1"));
+        var jwt = createJwt("user-1");
+        var exception = assertThrows(ElectoralProcessException.class, () -> useCase.execute(request, jwt));
         assertTrue(exception.getMessage().contains("already exists"));
         verify(repository, never()).save(any());
     }

@@ -53,8 +53,7 @@ public class EnrollmentController {
     @PostMapping("/processes/{processId}/enrollments")
     public ResponseEntity<ApiResponse<EnrollmentResponse>> create(
             @PathVariable UUID processId,
-            @Valid @RequestBody CreateEnrollmentRequest request,
-            @AuthenticationPrincipal Jwt jwt) {
+            @Valid @RequestBody CreateEnrollmentRequest request) {
         request.setElectoralProcessId(processId);
         var response = createEnrollmentUseCase.execute(request);
         return ResponseEntity.ok(ApiResponse.success(response));

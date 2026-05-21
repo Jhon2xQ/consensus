@@ -8,7 +8,6 @@ import com.carmenio.consensus.application.use_case.electoral_process.CreateElect
 import com.carmenio.consensus.application.use_case.electoral_process.DeleteElectoralProcessUseCase;
 import com.carmenio.consensus.application.use_case.electoral_process.ListProcessesByCreatorUseCase;
 import com.carmenio.consensus.application.use_case.electoral_process.UpdateElectoralProcessUseCase;
-import com.carmenio.consensus.application.util.JwtClaimExtractor;
 import com.carmenio.consensus.presentation.middleware.ApiResponse;
 
 import jakarta.validation.Valid;
@@ -36,35 +35,33 @@ public class ElectoralProcessPrivateController {
     private final UpdateElectoralProcessUseCase updateUseCase;
     private final DeleteElectoralProcessUseCase deleteUseCase;
     private final ListProcessesByCreatorUseCase listUseCase;
-    private final JwtClaimExtractor jwtClaimExtractor;
 
     /**
      * Creates a new electoral process.
      * <p>
-     * Extracts the creator's user ID from the JWT {@code sub} claim
-     * and sets it as {@code createdBy} on the new process entity.
+     * The authenticated JWT is forwarded to the use case, which extracts
+     * the creator's user ID from the {@code sub} claim.
      */
     @PostMapping
     public ResponseEntity<ApiResponse<ElectoralProcessResponse>> create(
             @Valid @RequestBody CreateElectoralProcessRequest request,
             @AuthenticationPrincipal Jwt jwt) {
-        var createdBy = jwtClaimExtractor.extractUserId(jwt);
-        var response = createUseCase.execute(request, createdBy);
+        var response = createUseCase.execute(request, jwt);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     /**
      * Lists electoral processes created by the authenticated user.
      * <p>
-     * Filtered by {@code createdBy} matching the JWT {@code sub} claim.
+     * The authenticated JWT is forwarded to the use case, which filters
+     * by {@code createdBy} matching the JWT {@code sub} claim.
      * Returns a paginated response with fresh computed estatus values.
      */
     @GetMapping
     public ResponseEntity<ApiResponse<PaginatedResponse<ElectoralProcessResponse>>> listMyProcesses(
             @AuthenticationPrincipal Jwt jwt,
             Pageable pageable) {
-        var createdBy = jwtClaimExtractor.extractUserId(jwt);
-        var response = listUseCase.execute(createdBy, pageable);
+        var response = listUseCase.execute(jwt, pageable);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
