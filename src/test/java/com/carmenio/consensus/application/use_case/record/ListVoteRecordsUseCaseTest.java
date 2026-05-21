@@ -1,6 +1,5 @@
 package com.carmenio.consensus.application.use_case.record;
 
-import com.carmenio.consensus.application.dto.PaginatedResponse;
 import com.carmenio.consensus.application.dto.record.VoteRecordResponse;
 import com.carmenio.consensus.domain.entity.VoteRecord;
 import com.carmenio.consensus.domain.repository.VoteRecordRepository;
@@ -20,8 +19,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 

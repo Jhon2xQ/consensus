@@ -2,7 +2,6 @@ package com.carmenio.consensus.application.dto;
 
 import com.carmenio.consensus.application.dto.electoral_process.CreateElectoralProcessRequest;
 import com.carmenio.consensus.application.dto.electoral_process.ElectoralProcessResponse;
-import com.carmenio.consensus.application.dto.PaginatedResponse;
 import com.carmenio.consensus.application.dto.electoral_process.ProcessStateResponse;
 import com.carmenio.consensus.application.dto.electoral_process.UpdateElectoralProcessRequest;
 import com.carmenio.consensus.common.constant.ProcessStatus;
