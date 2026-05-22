@@ -8,6 +8,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtValidators;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
@@ -22,9 +25,9 @@ import java.util.List;
  * Security configuration for the Consensus API.
  *
  * <p>Configures OAuth2 Resource Server with JWT validation via Logto.
- * JWT decoder is auto-configured by Spring Boot from
- * {@code spring.security.oauth2.resourceserver.jwt.*} properties.
- * Validates token signature (RS256), issuer, audience, and expiration.
+ * The {@link JwtDecoder} is created explicitly to accept {@code at+jwt}
+ * token types (RFC 9068) and discover signing algorithms from the JWKS endpoint.
+ * Validates token signature, issuer, audience, client_id, expiration, and not-before claims.
  *
  * <p>Defines the route authorization matrix with {@code /public/**} for
  * unauthenticated access and {@code /private/**} for role-protected operations.
@@ -65,6 +68,42 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
+    }
+
+    /**
+     * Custom {@link JwtDecoder} that accepts both {@code JWT} and {@code at+jwt}
+     * token types (RFC 9068) via {@link JwtValidators#createAtJwtValidator()},
+     * and discovers supported signing algorithms from the JWKS endpoint.
+     *
+     * <p>Created explicitly instead of relying on Spring Boot auto-configuration
+     * because Logto issues {@code typ: at+jwt} access tokens, which are not
+     * handled by the default auto-configuration.
+     *
+     * @param issuerUri  the expected issuer (validated against the {@code iss} claim)
+     * @param jwkSetUri  the Logto JWKS endpoint for signature verification keys
+     * @param audience   the required audience (validated against the {@code aud} claim)
+     * @param clientId   the expected client_id (validated against the {@code client_id} claim, mandatory for AT+jwt)
+     * @return fully configured {@link NimbusJwtDecoder}
+     */
+    @Bean
+    public JwtDecoder jwtDecoder(
+            @Value("${JWT_ISSUER}") String issuerUri,
+            @Value("${JWKS_URI}") String jwkSetUri,
+            @Value("${AUDIENCE}") String audience,
+            @Value("${CLIENT_ID}") String clientId) {
+
+        NimbusJwtDecoder decoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri)
+                .validateType(false)
+                .discoverJwsAlgorithms()
+                .build();
+
+        decoder.setJwtValidator(JwtValidators.createAtJwtValidator()
+                .issuer(issuerUri)
+                .audience(audience)
+                .clientId(clientId)
+                .build());
+
+        return decoder;
     }
 
     @Bean

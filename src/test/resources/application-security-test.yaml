@@ -1,4 +1,5 @@
 JWKS_URI: https://test-tenant.logto.app/oidc/jwks
 JWT_ISSUER: https://test-tenant.logto.app/oidc
 AUDIENCE: https://api.consensus.test
+CLIENT_ID: test-client-id
 CORS_ORIGINS: http://localhost:5173

@@ -6,14 +6,6 @@ spring:
     virtual:
       enabled: true
 
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: ${JWT_ISSUER}
-          jwk-set-uri: ${JWKS_URI}
-          audiences: ${AUDIENCE}
-
   datasource:
     url: ${DB_URL:jdbc:h2:mem:consensus;DB_CLOSE_DELAY=-1}
     username: ${DB_USERNAME:sa}
