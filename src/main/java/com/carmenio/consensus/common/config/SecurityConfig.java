@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -26,7 +27,8 @@ import java.util.List;
  *
  * <p>Configures OAuth2 Resource Server with JWT validation via Logto.
  * The {@link JwtDecoder} is created explicitly to accept {@code at+jwt}
- * token types (RFC 9068) and discover signing algorithms from the JWKS endpoint.
+ * token types (RFC 9068) and validates signatures using the ES384 algorithm
+ * (matching Logto's key type).
  * Validates token signature, issuer, audience, client_id, expiration, and not-before claims.
  *
  * <p>Defines the route authorization matrix with {@code /public/**} for
@@ -72,8 +74,9 @@ public class SecurityConfig {
 
     /**
      * Custom {@link JwtDecoder} that accepts both {@code JWT} and {@code at+jwt}
-     * token types (RFC 9068) via {@link JwtValidators#createAtJwtValidator()},
-     * and discovers supported signing algorithms from the JWKS endpoint.
+     * token types (RFC 9068) via {@link JwtValidators#createAtJwtValidator()}.
+     * Uses the ES384 algorithm explicitly to match Logto's key type (ECDSA P-384),
+     * avoiding an eager HTTP call to the JWKS endpoint at startup.
      *
      * <p>Created explicitly instead of relying on Spring Boot auto-configuration
      * because Logto issues {@code typ: at+jwt} access tokens, which are not
@@ -94,7 +97,7 @@ public class SecurityConfig {
 
         NimbusJwtDecoder decoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri)
                 .validateType(false)
-                .discoverJwsAlgorithms()
+                .jwsAlgorithm(SignatureAlgorithm.ES384)
                 .build();
 
         decoder.setJwtValidator(JwtValidators.createAtJwtValidator()
