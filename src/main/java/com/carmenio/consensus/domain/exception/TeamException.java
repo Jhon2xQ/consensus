@@ -25,4 +25,12 @@ public class TeamException extends DomainException {
     public static TeamException processNotFound() {
         return new TeamException("Associated electoral process not found", 404);
     }
+
+    public static TeamException emptyBatch() {
+        return new TeamException("At least one team is required", 400);
+    }
+
+    public static TeamException duplicateInBatch(String name) {
+        return new TeamException("Duplicate team name in request: \"" + name + "\"", 409);
+    }
 }

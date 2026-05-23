@@ -99,4 +99,23 @@ class EnrollmentExceptionTest {
         assertEquals(409, ex.getStatusCode());
         assertNotNull(ex.getMessage());
     }
+
+    @Test
+    @DisplayName("Should create emptyBatch with status 400")
+    void shouldCreateEmptyBatchException() {
+        var ex = EnrollmentException.emptyBatch();
+
+        assertEquals(400, ex.getStatusCode());
+        assertTrue(ex.getMessage().contains("At least one enrollment"));
+    }
+
+    @Test
+    @DisplayName("Should create duplicateEmailInBatch with status 409 and email in message")
+    void shouldCreateDuplicateEmailInBatchException() {
+        var ex = EnrollmentException.duplicateEmailInBatch("dup@test.com");
+
+        assertEquals(409, ex.getStatusCode());
+        assertTrue(ex.getMessage().contains("dup@test.com"));
+        assertTrue(ex.getMessage().contains("Duplicate"));
+    }
 }
