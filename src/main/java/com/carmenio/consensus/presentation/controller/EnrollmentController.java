@@ -4,7 +4,7 @@ import com.carmenio.consensus.application.dto.enrollment.ClaimEnrollmentRequest;
 import com.carmenio.consensus.application.dto.enrollment.CreateEnrollmentRequest;
 import com.carmenio.consensus.application.dto.enrollment.EnrollmentResponse;
 import com.carmenio.consensus.application.use_case.enrollment.ClaimEnrollmentUseCase;
-import com.carmenio.consensus.application.use_case.enrollment.CreateEnrollmentUseCase;
+import com.carmenio.consensus.application.use_case.enrollment.CreateEnrollmentsBatchUseCase;
 import com.carmenio.consensus.application.use_case.enrollment.DeleteEnrollmentUseCase;
 import com.carmenio.consensus.application.use_case.enrollment.FindEnrollmentByIdUseCase;
 import com.carmenio.consensus.application.use_case.enrollment.ListEnrollmentsByProcessUseCase;
@@ -38,24 +38,25 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class EnrollmentController {
 
-    private final CreateEnrollmentUseCase createEnrollmentUseCase;
+    private final CreateEnrollmentsBatchUseCase createEnrollmentsBatchUseCase;
     private final ClaimEnrollmentUseCase claimEnrollmentUseCase;
     private final ListEnrollmentsByProcessUseCase listEnrollmentsUseCase;
     private final FindEnrollmentByIdUseCase findEnrollmentByIdUseCase;
     private final DeleteEnrollmentUseCase deleteEnrollmentUseCase;
 
     /**
-     * Creates a new enrollment with email only (creator phase).
-     * The enrollment is not yet claimed — userId and commitment remain null.
+     * Creates enrollments with email only (creator phase, batch operation).
+     * Accepts a JSON array of {@link CreateEnrollmentRequest} objects.
+     * All enrollments are created atomically — any validation failure rolls back the entire batch.
      * <p>
      * Requires {@code consensus-creator} role (enforced by SecurityConfig).
      */
     @PostMapping("/processes/{processId}/enrollments")
-    public ResponseEntity<ApiResponse<EnrollmentResponse>> create(
+    public ResponseEntity<ApiResponse<List<EnrollmentResponse>>> create(
             @PathVariable UUID processId,
-            @Valid @RequestBody CreateEnrollmentRequest request) {
-        var response = createEnrollmentUseCase.execute(processId, request);
-        return ResponseEntity.ok(ApiResponse.success(response));
+            @Valid @RequestBody List<CreateEnrollmentRequest> requests) {
+        var responses = createEnrollmentsBatchUseCase.execute(processId, requests);
+        return ResponseEntity.ok(ApiResponse.success(responses.size() + " enrollments created", responses));
     }
 
     /**

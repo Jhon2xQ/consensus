@@ -4,7 +4,7 @@ import com.carmenio.consensus.application.dto.enrollment.ClaimEnrollmentRequest;
 import com.carmenio.consensus.application.dto.enrollment.CreateEnrollmentRequest;
 import com.carmenio.consensus.application.dto.enrollment.EnrollmentResponse;
 import com.carmenio.consensus.application.use_case.enrollment.ClaimEnrollmentUseCase;
-import com.carmenio.consensus.application.use_case.enrollment.CreateEnrollmentUseCase;
+import com.carmenio.consensus.application.use_case.enrollment.CreateEnrollmentsBatchUseCase;
 import com.carmenio.consensus.application.use_case.enrollment.DeleteEnrollmentUseCase;
 import com.carmenio.consensus.application.use_case.enrollment.FindEnrollmentByIdUseCase;
 import com.carmenio.consensus.application.use_case.enrollment.ListEnrollmentsByProcessUseCase;
@@ -44,7 +44,7 @@ class EnrollmentControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
-    private CreateEnrollmentUseCase createEnrollmentUseCase;
+    private CreateEnrollmentsBatchUseCase createEnrollmentsBatchUseCase;
 
     @MockitoBean
     private FindEnrollmentByIdUseCase findEnrollmentByIdUseCase;
@@ -58,26 +58,26 @@ class EnrollmentControllerTest {
     @MockitoBean
     private DeleteEnrollmentUseCase deleteEnrollmentUseCase;
 
-    // ── POST /private/processes/{processId}/enrollments ──
+    // ── POST /private/processes/{processId}/enrollments (batch) ──
 
     @Test
-    @DisplayName("POST /private/processes/{processId}/enrollments should create enrollment")
-    void shouldCreateEnrollment() throws Exception {
+    @DisplayName("POST /private/processes/{processId}/enrollments should create single enrollment in batch")
+    void shouldCreateSingleEnrollmentInBatch() throws Exception {
         var processId = UUID.randomUUID();
-        var request = CreateEnrollmentRequest.builder()
+        var request = List.of(CreateEnrollmentRequest.builder()
                 .email("voter@example.com")
-                .build();
+                .build());
 
-        var response = EnrollmentResponse.builder()
+        var response = List.of(EnrollmentResponse.builder()
                 .id(UUID.randomUUID())
                 .electoralProcessId(processId)
                 .email("voter@example.com")
                 .userId(null)
                 .commitment(null)
                 .hasVoted(false)
-                .build();
+                .build());
 
-        when(createEnrollmentUseCase.execute(any(UUID.class), any(CreateEnrollmentRequest.class)))
+        when(createEnrollmentsBatchUseCase.execute(any(UUID.class), any()))
                 .thenReturn(response);
 
         mockMvc.perform(post("/private/processes/{processId}/enrollments", processId)
@@ -85,20 +85,93 @@ class EnrollmentControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.email").value("voter@example.com"))
-                .andExpect(jsonPath("$.data.electoralProcessId").value(processId.toString()))
-                .andExpect(jsonPath("$.data.hasVoted").value(false));
+                .andExpect(jsonPath("$.data[0].email").value("voter@example.com"))
+                .andExpect(jsonPath("$.data[0].electoralProcessId").value(processId.toString()))
+                .andExpect(jsonPath("$.data[0].hasVoted").value(false));
     }
 
     @Test
-    @DisplayName("POST should return 404 when process not found")
+    @DisplayName("POST /private/processes/{processId}/enrollments should create multiple enrollments in batch")
+    void shouldCreateMultipleEnrollmentsInBatch() throws Exception {
+        var processId = UUID.randomUUID();
+        var requests = List.of(
+                CreateEnrollmentRequest.builder().email("voter1@example.com").build(),
+                CreateEnrollmentRequest.builder().email("voter2@example.com").build(),
+                CreateEnrollmentRequest.builder().email("voter3@example.com").build()
+        );
+
+        var responses = List.of(
+                EnrollmentResponse.builder().id(UUID.randomUUID()).electoralProcessId(processId).email("voter1@example.com").hasVoted(false).build(),
+                EnrollmentResponse.builder().id(UUID.randomUUID()).electoralProcessId(processId).email("voter2@example.com").hasVoted(false).build(),
+                EnrollmentResponse.builder().id(UUID.randomUUID()).electoralProcessId(processId).email("voter3@example.com").hasVoted(false).build()
+        );
+
+        when(createEnrollmentsBatchUseCase.execute(any(UUID.class), any()))
+                .thenReturn(responses);
+
+        mockMvc.perform(post("/private/processes/{processId}/enrollments", processId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requests)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.length()").value(3))
+                .andExpect(jsonPath("$.data[0].email").value("voter1@example.com"))
+                .andExpect(jsonPath("$.data[1].email").value("voter2@example.com"))
+                .andExpect(jsonPath("$.data[2].email").value("voter3@example.com"));
+    }
+
+    @Test
+    @DisplayName("POST /private/processes/{processId}/enrollments should return 400 for empty array")
+    void shouldReturn400WhenEmptyArray() throws Exception {
+        var processId = UUID.randomUUID();
+
+        when(createEnrollmentsBatchUseCase.execute(any(UUID.class), any()))
+                .thenThrow(EnrollmentException.emptyBatch());
+
+        mockMvc.perform(post("/private/processes/{processId}/enrollments", processId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("[]"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false));
+    }
+
+    @Test
+    @DisplayName("POST /private/processes/{processId}/enrollments should return 400 when email is blank")
+    void shouldReturn400WhenEmailIsBlank() throws Exception {
+        var processId = UUID.randomUUID();
+        var body = "[{\"email\":\"\"}]";
+
+        // Spring MVC validation rejects before use case is called
+        mockMvc.perform(post("/private/processes/{processId}/enrollments", processId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false));
+    }
+
+    @Test
+    @DisplayName("POST /private/processes/{processId}/enrollments should return 400 when using single object body (not array)")
+    void shouldReturn400WhenSingleObjectNotArray() throws Exception {
+        var processId = UUID.randomUUID();
+        var body = objectMapper.writeValueAsString(
+                CreateEnrollmentRequest.builder().email("voter@example.com").build()
+        );
+
+        mockMvc.perform(post("/private/processes/{processId}/enrollments", processId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("POST /private/processes/{processId}/enrollments should return 404 when process not found")
     void shouldReturn404WhenProcessNotFound() throws Exception {
         var processId = UUID.randomUUID();
-        var request = CreateEnrollmentRequest.builder()
+        var request = List.of(CreateEnrollmentRequest.builder()
                 .email("voter@example.com")
-                .build();
+                .build());
 
-        when(createEnrollmentUseCase.execute(any(UUID.class), any(CreateEnrollmentRequest.class)))
+        when(createEnrollmentsBatchUseCase.execute(any(UUID.class), any()))
                 .thenThrow(ElectoralProcessException.notFound(processId));
 
         mockMvc.perform(post("/private/processes/{processId}/enrollments", processId)
@@ -109,20 +182,55 @@ class EnrollmentControllerTest {
     }
 
     @Test
-    @DisplayName("POST should return 409 when duplicate email")
-    void shouldReturn409WhenDuplicate() throws Exception {
+    @DisplayName("POST /private/processes/{processId}/enrollments should return 409 on within-batch duplicate email")
+    void shouldReturn409WhenWithinBatchDuplicateEmail() throws Exception {
         var processId = UUID.randomUUID();
-        var request = CreateEnrollmentRequest.builder()
-                .email("voter@example.com")
-                .build();
 
-        when(createEnrollmentUseCase.execute(any(UUID.class), any(CreateEnrollmentRequest.class)))
-                .thenThrow(EnrollmentException.emailAlreadyRegistered(processId, "voter@example.com"));
+        when(createEnrollmentsBatchUseCase.execute(any(UUID.class), any()))
+                .thenThrow(EnrollmentException.duplicateEmailInBatch("dup@example.com"));
+
+        var body = "[{\"email\":\"dup@example.com\"},{\"email\":\"dup@example.com\"}]";
+
+        mockMvc.perform(post("/private/processes/{processId}/enrollments", processId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.success").value(false));
+    }
+
+    @Test
+    @DisplayName("POST /private/processes/{processId}/enrollments should return 409 on cross-batch DB email conflict")
+    void shouldReturn409WhenCrossBatchDbEmailConflict() throws Exception {
+        var processId = UUID.randomUUID();
+        var request = List.of(CreateEnrollmentRequest.builder()
+                .email("existing@example.com")
+                .build());
+
+        when(createEnrollmentsBatchUseCase.execute(any(UUID.class), any()))
+                .thenThrow(EnrollmentException.emailAlreadyRegistered(processId, "existing@example.com"));
 
         mockMvc.perform(post("/private/processes/{processId}/enrollments", processId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.success").value(false));
+    }
+
+    @Test
+    @DisplayName("POST /private/processes/{processId}/enrollments should return 400 when process state is invalid")
+    void shouldReturn400WhenInvalidState() throws Exception {
+        var processId = UUID.randomUUID();
+        var request = List.of(CreateEnrollmentRequest.builder()
+                .email("voter@example.com")
+                .build());
+
+        when(createEnrollmentsBatchUseCase.execute(any(UUID.class), any()))
+                .thenThrow(EnrollmentException.invalidState("Enrollment not open for this process"));
+
+        mockMvc.perform(post("/private/processes/{processId}/enrollments", processId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false));
     }
 
