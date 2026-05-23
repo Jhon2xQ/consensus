@@ -25,11 +25,10 @@ class EnrollmentMapperTest {
     void shouldMapRequestWithEmailToEntity() {
         var processId = UUID.randomUUID();
         var request = CreateEnrollmentRequest.builder()
-                .electoralProcessId(processId)
                 .email("voter@example.com")
                 .build();
 
-        var entity = mapper.toEntity(request);
+        var entity = mapper.toEntity(request, processId);
 
         assertNull(entity.getId(), "ID should be null for JPA generation");
         assertEquals(processId, entity.getElectoralProcessId());
@@ -40,23 +39,19 @@ class EnrollmentMapperTest {
     }
 
     @Test
-    @DisplayName("Should map CreateEnrollmentRequest with all fields to entity")
-    void shouldMapRequestWithAllFieldsToEntity() {
+    @DisplayName("Should map CreateEnrollmentRequest always setting userId and commitment to null")
+    void shouldMapRequestAlwaysSettingUserIdAndCommitmentToNull() {
         var processId = UUID.randomUUID();
         var request = CreateEnrollmentRequest.builder()
-                .electoralProcessId(processId)
                 .email("voter@example.com")
-                .userId("user-123")
-                .commitment("1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
                 .build();
 
-        var entity = mapper.toEntity(request);
+        var entity = mapper.toEntity(request, processId);
 
         assertEquals(processId, entity.getElectoralProcessId());
         assertEquals("voter@example.com", entity.getEmail());
-        assertEquals("user-123", entity.getUserId());
-        assertEquals("1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
-                entity.getCommitment());
+        assertNull(entity.getUserId(), "userId should always be null in creator phase");
+        assertNull(entity.getCommitment(), "commitment should always be null in creator phase");
     }
 
     @Test
@@ -131,20 +126,12 @@ class EnrollmentMapperTest {
     @Test
     @DisplayName("Should create CreateEnrollmentRequest with email via builder")
     void shouldCreateCreateEnrollmentRequestWithEmail() {
-        var processId = UUID.randomUUID();
         var request = CreateEnrollmentRequest.builder()
-                .electoralProcessId(processId)
                 .email("voter@example.com")
-                .userId("user-001")
-                .commitment("4444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444")
                 .build();
 
         assertNotNull(request);
-        assertEquals(processId, request.getElectoralProcessId());
         assertEquals("voter@example.com", request.getEmail());
-        assertEquals("user-001", request.getUserId());
-        assertEquals("4444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444",
-                request.getCommitment());
     }
 
     @Test

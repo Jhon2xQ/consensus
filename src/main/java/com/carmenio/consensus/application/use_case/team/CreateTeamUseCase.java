@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 /**
  * Use case for creating a new team within an electoral process.
  * <p>
@@ -29,13 +31,13 @@ public class CreateTeamUseCase {
     /**
      * Creates a new team.
      *
-     * @param request the creation payload with name, avatarUrl, and electoralProcessId
+     * @param processId the electoral process to create the team in
+     * @param request   the creation payload with name and avatarUrl
      * @return the created team as a response DTO
      * @throws ElectoralProcessException if the process does not exist
      * @throws TeamException             if a team with the same name already exists in the process
      */
-    public TeamResponse execute(CreateTeamRequest request) {
-        var processId = request.getElectoralProcessId();
+    public TeamResponse execute(UUID processId, CreateTeamRequest request) {
 
         electoralProcessRepository.findById(processId)
                 .orElseThrow(() -> ElectoralProcessException.notFound(processId));
@@ -44,7 +46,7 @@ public class CreateTeamUseCase {
             throw TeamException.alreadyExists(request.getName());
         }
 
-        var entity = mapper.toEntity(request);
+        var entity = mapper.toEntity(request, processId);
         var saved = teamRepository.save(entity);
         return mapper.toResponse(saved);
     }

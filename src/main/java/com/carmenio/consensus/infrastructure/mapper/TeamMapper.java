@@ -5,6 +5,8 @@ import com.carmenio.consensus.application.dto.team.TeamResponse;
 import com.carmenio.consensus.domain.entity.Team;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 /**
  * Mapper for {@link Team} entity ↔ DTO conversions.
  * <p>
@@ -17,11 +19,11 @@ public class TeamMapper {
     /**
      * Converts a create request to a new entity (with null ID for JPA generation).
      */
-    public Team toEntity(CreateTeamRequest request) {
+    public Team toEntity(CreateTeamRequest request, UUID processId) {
         return Team.builder()
                 .name(request.getName())
                 .avatarUrl(request.getAvatarUrl())
-                .electoralProcessId(request.getElectoralProcessId())
+                .electoralProcessId(processId)
                 .build();
     }
 

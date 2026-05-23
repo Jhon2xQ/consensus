@@ -52,7 +52,6 @@ class TeamPrivateControllerTest {
         var request = CreateTeamRequest.builder()
                 .name("Team Alpha")
                 .avatarUrl("https://avatar.example.com/alpha.png")
-                .electoralProcessId(processId)
                 .build();
 
         var response = TeamResponse.builder()
@@ -62,7 +61,8 @@ class TeamPrivateControllerTest {
                 .electoralProcessId(processId)
                 .build();
 
-        when(createTeamUseCase.execute(any())).thenReturn(response);
+        when(createTeamUseCase.execute(any(UUID.class), any(CreateTeamRequest.class)))
+                .thenReturn(response);
 
         mockMvc.perform(post("/private/processes/{processId}/teams", processId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -79,10 +79,9 @@ class TeamPrivateControllerTest {
         var processId = UUID.randomUUID();
         var request = CreateTeamRequest.builder()
                 .name("Team Alpha")
-                .electoralProcessId(processId)
                 .build();
 
-        when(createTeamUseCase.execute(any()))
+        when(createTeamUseCase.execute(any(UUID.class), any(CreateTeamRequest.class)))
                 .thenThrow(ElectoralProcessException.notFound(processId));
 
         mockMvc.perform(post("/private/processes/{processId}/teams", processId)

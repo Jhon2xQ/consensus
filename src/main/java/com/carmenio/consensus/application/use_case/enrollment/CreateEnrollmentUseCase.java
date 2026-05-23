@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.UUID;
 
 /**
  * Use case for creating a new enrollment within an electoral process.
@@ -21,9 +22,8 @@ import java.time.Instant;
  * <b>Two-phase enrollment flow — Creator Phase</b>:
  * <ol>
  *   <li>Validates the electoral process exists and is in NONE or COMMITMENT state</li>
- *   <li>Enforces email uniqueness per process (replaces old userId uniqueness)</li>
- *   <li>Enforces commitment uniqueness per process (only when commitment is provided)</li>
- *   <li>Creates the enrollment with email populated; userId and commitment may be null</li>
+ *   <li>Enforces email uniqueness per process</li>
+ *   <li>Creates the enrollment with email populated; userId and commitment are null</li>
  * </ol>
  * The user later claims the enrollment by matching their JWT email and providing
  * a commitment (see {@code ClaimEnrollmentUseCase}).
@@ -40,20 +40,18 @@ public class CreateEnrollmentUseCase {
     /**
      * Creates a new enrollment in the creator phase.
      * <p>
-     * At minimum, {@code electoralProcessId} and {@code email} are required.
-     * {@code userId} and {@code commitment} are optional at this stage —
-     * they are set later when the user claims the enrollment.
+     * Only {@code email} is required. {@code userId} and {@code commitment}
+     * are always null at this stage — they are set later when the user claims
+     * the enrollment.
      *
-     * @param request the creation payload with electoralProcessId, email,
-     *                and optionally userId and commitment
+     * @param processId the electoral process to create the enrollment in
+     * @param request   the creation payload with email
      * @return the created enrollment as a response DTO
      * @throws ElectoralProcessException if the process does not exist (404)
      * @throws EnrollmentException       if the process is not in NONE/COMMITMENT state (400),
-     *                                   if the email is already registered in this process (409),
-     *                                   or if a duplicate commitment exists (409)
+     *                                   or if the email is already registered in this process (409)
      */
-    public EnrollmentResponse execute(CreateEnrollmentRequest request) {
-        var processId = request.getElectoralProcessId();
+    public EnrollmentResponse execute(UUID processId, CreateEnrollmentRequest request) {
 
         var process = electoralProcessRepository.findById(processId)
                 .orElseThrow(() -> ElectoralProcessException.notFound(processId));
@@ -67,18 +65,12 @@ public class CreateEnrollmentUseCase {
             throw EnrollmentException.invalidState("Enrollment not open for this process");
         }
 
-        // Enforce email uniqueness per process (replaces old userId uniqueness)
+        // Enforce email uniqueness per process
         if (enrollmentRepository.existsByElectoralProcessIdAndEmail(processId, request.getEmail())) {
             throw EnrollmentException.emailAlreadyRegistered(processId, request.getEmail());
         }
 
-        // Enforce commitment uniqueness only when commitment is provided
-        if (request.getCommitment() != null
-                && enrollmentRepository.existsByElectoralProcessIdAndCommitment(processId, request.getCommitment())) {
-            throw EnrollmentException.duplicateCommitment();
-        }
-
-        var entity = mapper.toEntity(request);
+        var entity = mapper.toEntity(request, processId);
         var saved = enrollmentRepository.save(entity);
         return mapper.toResponse(saved);
     }

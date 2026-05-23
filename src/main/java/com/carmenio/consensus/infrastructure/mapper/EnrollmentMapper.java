@@ -5,6 +5,8 @@ import com.carmenio.consensus.application.dto.enrollment.EnrollmentResponse;
 import com.carmenio.consensus.domain.entity.Enrollment;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 /**
  * Mapper for {@link Enrollment} entity ↔ DTO conversions.
  * <p>
@@ -17,14 +19,15 @@ public class EnrollmentMapper {
     /**
      * Converts a create request to a new entity (with null ID for JPA generation).
      * <p>
-     * In the creator phase, email is mandatory while userId and commitment may be null.
+     * In the creator phase, email is mandatory while userId and commitment
+     * are always set to null — they are populated later in the claim phase.
      */
-    public Enrollment toEntity(CreateEnrollmentRequest request) {
+    public Enrollment toEntity(CreateEnrollmentRequest request, UUID processId) {
         return Enrollment.builder()
-                .electoralProcessId(request.getElectoralProcessId())
+                .electoralProcessId(processId)
                 .email(request.getEmail())
-                .userId(request.getUserId())
-                .commitment(request.getCommitment())
+                .userId(null)
+                .commitment(null)
                 .build();
     }
 

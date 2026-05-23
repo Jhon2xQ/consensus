@@ -54,8 +54,7 @@ public class EnrollmentController {
     public ResponseEntity<ApiResponse<EnrollmentResponse>> create(
             @PathVariable UUID processId,
             @Valid @RequestBody CreateEnrollmentRequest request) {
-        request.setElectoralProcessId(processId);
-        var response = createEnrollmentUseCase.execute(request);
+        var response = createEnrollmentUseCase.execute(processId, request);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

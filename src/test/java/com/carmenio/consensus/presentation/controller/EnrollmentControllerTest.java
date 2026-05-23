@@ -65,7 +65,6 @@ class EnrollmentControllerTest {
     void shouldCreateEnrollment() throws Exception {
         var processId = UUID.randomUUID();
         var request = CreateEnrollmentRequest.builder()
-                .electoralProcessId(processId)
                 .email("voter@example.com")
                 .build();
 
@@ -78,7 +77,8 @@ class EnrollmentControllerTest {
                 .hasVoted(false)
                 .build();
 
-        when(createEnrollmentUseCase.execute(any())).thenReturn(response);
+        when(createEnrollmentUseCase.execute(any(UUID.class), any(CreateEnrollmentRequest.class)))
+                .thenReturn(response);
 
         mockMvc.perform(post("/private/processes/{processId}/enrollments", processId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -95,11 +95,10 @@ class EnrollmentControllerTest {
     void shouldReturn404WhenProcessNotFound() throws Exception {
         var processId = UUID.randomUUID();
         var request = CreateEnrollmentRequest.builder()
-                .electoralProcessId(processId)
                 .email("voter@example.com")
                 .build();
 
-        when(createEnrollmentUseCase.execute(any()))
+        when(createEnrollmentUseCase.execute(any(UUID.class), any(CreateEnrollmentRequest.class)))
                 .thenThrow(ElectoralProcessException.notFound(processId));
 
         mockMvc.perform(post("/private/processes/{processId}/enrollments", processId)
@@ -114,11 +113,10 @@ class EnrollmentControllerTest {
     void shouldReturn409WhenDuplicate() throws Exception {
         var processId = UUID.randomUUID();
         var request = CreateEnrollmentRequest.builder()
-                .electoralProcessId(processId)
                 .email("voter@example.com")
                 .build();
 
-        when(createEnrollmentUseCase.execute(any()))
+        when(createEnrollmentUseCase.execute(any(UUID.class), any(CreateEnrollmentRequest.class)))
                 .thenThrow(EnrollmentException.emailAlreadyRegistered(processId, "voter@example.com"));
 
         mockMvc.perform(post("/private/processes/{processId}/enrollments", processId)

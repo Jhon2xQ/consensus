@@ -37,8 +37,7 @@ public class TeamPrivateController {
     public ResponseEntity<ApiResponse<TeamResponse>> create(
             @PathVariable UUID processId,
             @Valid @RequestBody CreateTeamRequest request) {
-        request.setElectoralProcessId(processId);
-        var response = createTeamUseCase.execute(request);
+        var response = createTeamUseCase.execute(processId, request);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

@@ -49,7 +49,6 @@ class CreateTeamUseCaseTest {
         var request = CreateTeamRequest.builder()
                 .name("Team Alpha")
                 .avatarUrl("https://avatar.example.com/alpha.png")
-                .electoralProcessId(processId)
                 .build();
 
         var entity = new Team();
@@ -71,18 +70,18 @@ class CreateTeamUseCaseTest {
                 .electoralProcessId(processId)
                 .build();
 
-        when(mapper.toEntity(request)).thenReturn(entity);
+        when(mapper.toEntity(request, processId)).thenReturn(entity);
         when(teamRepository.save(entity)).thenReturn(savedEntity);
         when(mapper.toResponse(savedEntity)).thenReturn(expectedResponse);
 
-        var result = useCase.execute(request);
+        var result = useCase.execute(processId, request);
 
         assertNotNull(result);
         assertEquals("Team Alpha", result.getName());
         assertEquals(processId, result.getElectoralProcessId());
         verify(electoralProcessRepository).findById(processId);
         verify(teamRepository).existsByElectoralProcessIdAndName(processId, "Team Alpha");
-        verify(mapper).toEntity(request);
+        verify(mapper).toEntity(request, processId);
         verify(teamRepository).save(entity);
         verify(mapper).toResponse(savedEntity);
     }
@@ -93,14 +92,13 @@ class CreateTeamUseCaseTest {
         var processId = UUID.randomUUID();
         var request = CreateTeamRequest.builder()
                 .name("Team Alpha")
-                .electoralProcessId(processId)
                 .build();
 
         when(electoralProcessRepository.findById(processId))
                 .thenReturn(Optional.empty());
 
         var exception = assertThrows(ElectoralProcessException.class,
-                () -> useCase.execute(request));
+                () -> useCase.execute(processId, request));
 
         assertTrue(exception.getMessage().contains("not found"));
         verify(teamRepository, never()).save(any());
@@ -112,7 +110,6 @@ class CreateTeamUseCaseTest {
         var processId = UUID.randomUUID();
         var request = CreateTeamRequest.builder()
                 .name("Team Alpha")
-                .electoralProcessId(processId)
                 .build();
 
         when(electoralProcessRepository.findById(processId))
@@ -121,7 +118,7 @@ class CreateTeamUseCaseTest {
                 .thenReturn(true);
 
         var exception = assertThrows(TeamException.class,
-                () -> useCase.execute(request));
+                () -> useCase.execute(processId, request));
 
         assertTrue(exception.getMessage().contains("already exists"));
         verify(teamRepository, never()).save(any());
