@@ -68,4 +68,14 @@ public class JpaEnrollmentRepositoryAdapter implements EnrollmentRepository {
     public long countByElectoralProcessId(UUID electoralProcessId) {
         return jpaRepository.countByElectoralProcessId(electoralProcessId);
     }
+
+    @Override
+    public List<Enrollment> saveAll(List<Enrollment> enrollments) {
+        return jpaRepository.saveAll(enrollments);
+    }
+
+    @Override
+    public List<String> findEmailsByProcessIdAndEmailsIn(UUID processId, List<String> emails) {
+        return jpaRepository.findEmailsByElectoralProcessIdAndEmailIn(processId, emails);
+    }
 }

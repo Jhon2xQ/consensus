@@ -30,4 +30,8 @@ public interface EnrollmentRepository {
     boolean existsByElectoralProcessIdAndEmail(UUID electoralProcessId, String email);
 
     long countByElectoralProcessId(UUID electoralProcessId);
+
+    List<Enrollment> saveAll(List<Enrollment> enrollments);
+
+    List<String> findEmailsByProcessIdAndEmailsIn(UUID processId, List<String> emails);
 }
