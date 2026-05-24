@@ -2,6 +2,7 @@ package com.carmenio.consensus.infrastructure.repository;
 
 import com.carmenio.consensus.domain.entity.Team;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -21,4 +22,7 @@ interface JpaTeamRepository extends JpaRepository<Team, UUID> {
     boolean existsByElectoralProcessId(UUID electoralProcessId);
 
     boolean existsByElectoralProcessIdAndName(UUID electoralProcessId, String name);
+
+    @Query("SELECT t.name FROM Team t WHERE t.electoralProcessId = :processId AND t.name IN :names")
+    List<String> findNamesByElectoralProcessIdAndNameIn(UUID processId, List<String> names);
 }

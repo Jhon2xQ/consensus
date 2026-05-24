@@ -23,10 +23,9 @@ class TeamMapperTest {
         var request = CreateTeamRequest.builder()
                 .name("Team Alpha")
                 .avatarUrl("https://avatar.example.com/alpha.png")
-                .electoralProcessId(processId)
                 .build();
 
-        var entity = mapper.toEntity(request);
+        var entity = mapper.toEntity(request, processId);
 
         assertNull(entity.getId(), "Entity ID should be null until persisted");
         assertEquals("Team Alpha", entity.getName());

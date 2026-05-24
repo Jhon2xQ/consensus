@@ -53,4 +53,14 @@ public class JpaTeamRepositoryAdapter implements TeamRepository {
     public boolean existsByElectoralProcessIdAndName(UUID electoralProcessId, String name) {
         return jpaRepository.existsByElectoralProcessIdAndName(electoralProcessId, name);
     }
+
+    @Override
+    public List<Team> saveAll(List<Team> teams) {
+        return jpaRepository.saveAll(teams);
+    }
+
+    @Override
+    public List<String> findNamesByProcessIdAndNamesIn(UUID processId, List<String> names) {
+        return jpaRepository.findNamesByElectoralProcessIdAndNameIn(processId, names);
+    }
 }

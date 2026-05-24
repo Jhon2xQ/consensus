@@ -3,7 +3,7 @@ package com.carmenio.consensus.presentation.controller;
 import com.carmenio.consensus.application.dto.team.CreateTeamRequest;
 import com.carmenio.consensus.application.dto.team.TeamResponse;
 import com.carmenio.consensus.application.dto.team.UpdateTeamRequest;
-import com.carmenio.consensus.application.use_case.team.CreateTeamUseCase;
+import com.carmenio.consensus.application.use_case.team.CreateTeamsBatchUseCase;
 import com.carmenio.consensus.application.use_case.team.DeleteTeamUseCase;
 import com.carmenio.consensus.application.use_case.team.UpdateTeamUseCase;
 import com.carmenio.consensus.presentation.middleware.ApiResponse;
@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -26,20 +27,21 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TeamPrivateController {
 
-    private final CreateTeamUseCase createTeamUseCase;
+    private final CreateTeamsBatchUseCase createTeamsBatchUseCase;
     private final UpdateTeamUseCase updateTeamUseCase;
     private final DeleteTeamUseCase deleteTeamUseCase;
 
     /**
-     * Creates a new team within an electoral process.
+     * Creates teams within an electoral process (batch operation).
+     * Accepts a JSON array of {@link CreateTeamRequest} objects.
+     * All teams are created atomically — any validation failure rolls back the entire batch.
      */
     @PostMapping("/processes/{processId}/teams")
-    public ResponseEntity<ApiResponse<TeamResponse>> create(
+    public ResponseEntity<ApiResponse<List<TeamResponse>>> create(
             @PathVariable UUID processId,
-            @Valid @RequestBody CreateTeamRequest request) {
-        request.setElectoralProcessId(processId);
-        var response = createTeamUseCase.execute(request);
-        return ResponseEntity.ok(ApiResponse.success(response));
+            @Valid @RequestBody List<CreateTeamRequest> requests) {
+        var responses = createTeamsBatchUseCase.execute(processId, requests);
+        return ResponseEntity.ok(ApiResponse.success(responses.size() + " teams created", responses));
     }
 
     /**

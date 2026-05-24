@@ -51,4 +51,12 @@ public class EnrollmentException extends DomainException {
     public static EnrollmentException processIdMismatch() {
         return new EnrollmentException("Enrollment does not belong to the specified process", 404);
     }
+
+    public static EnrollmentException emptyBatch() {
+        return new EnrollmentException("At least one enrollment is required", 400);
+    }
+
+    public static EnrollmentException duplicateEmailInBatch(String email) {
+        return new EnrollmentException("Duplicate email in request: " + email, 409);
+    }
 }

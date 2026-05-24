@@ -121,7 +121,9 @@ Obtiene una inscripción por su ID.
 
 ## POST /api/private/processes/{processId}/enrollments <a name="post-apiprivateprocessesprocessidenrollments-crear"></a>
 
-**Fase 1 — Creator**: Registra un votante en el proceso electoral mediante su email.
+**Fase 1 — Creator**: Registra votantes en el proceso electoral mediante sus emails (operación batch).
+Acepta un array JSON de inscripciones. Todas se crean atómicamente —
+cualquier fallo de validación revierte el batch completo.
 
 Solo se permite crear inscripciones cuando el proceso está en estado `NONE` o `COMMITMENT`.
 
@@ -136,9 +138,11 @@ Solo se permite crear inscripciones cuando el proceso está en estado `NONE` o `
 ### Request Body
 
 ```
-{
-  "email": "string (requerido)"
-}
+[
+  {
+    "email": "string (requerido, formato email válido)"
+  }
+]
 ```
 
 > Nota: `electoralProcessId` se setea automáticamente desde el path parameter. `userId` y `commitment` no se envían en esta fase — se setean cuando el usuario reclama la inscripción en la fase 2.
@@ -148,15 +152,17 @@ Solo se permite crear inscripciones cuando el proceso está en estado `NONE` o `
 ```
 {
   "success": true,
-  "message": "Operation successful",
-  "data": {
-    "id": "uuid",
-    "electoralProcessId": "uuid",
-    "email": "string",
-    "userId": null,
-    "commitment": null,
-    "hasVoted": false
-  },
+  "message": "N enrollments created",
+  "data": [
+    {
+      "id": "uuid",
+      "electoralProcessId": "uuid",
+      "email": "string",
+      "userId": null,
+      "commitment": null,
+      "hasVoted": false
+    }
+  ],
   "timestamp": 1234567890
 }
 ```
@@ -166,7 +172,25 @@ Solo se permite crear inscripciones cuando el proceso está en estado `NONE` o `
 ```
 {
   "success": false,
+  "message": "At least one enrollment is required",
+  "data": null,
+  "timestamp": 1234567890
+}
+```
+
+```
+{
+  "success": false,
   "message": "Enrollment not open for this process",
+  "data": null,
+  "timestamp": 1234567890
+}
+```
+
+```
+{
+  "success": false,
+  "message": "Email is required",
   "data": null,
   "timestamp": 1234567890
 }
@@ -195,6 +219,15 @@ Solo se permite crear inscripciones cuando el proceso está en estado `NONE` o `
 ```
 
 ### Respuesta `409 Conflict`
+
+```
+{
+  "success": false,
+  "message": "Duplicate email in request: dup@example.com",
+  "data": null,
+  "timestamp": 1234567890
+}
+```
 
 ```
 {

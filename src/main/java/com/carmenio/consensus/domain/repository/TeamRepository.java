@@ -24,4 +24,8 @@ public interface TeamRepository {
     boolean existsByProcessId(UUID processId);
 
     boolean existsByElectoralProcessIdAndName(UUID electoralProcessId, String name);
+
+    List<Team> saveAll(List<Team> teams);
+
+    List<String> findNamesByProcessIdAndNamesIn(UUID processId, List<String> names);
 }

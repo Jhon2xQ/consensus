@@ -2,6 +2,7 @@ package com.carmenio.consensus.infrastructure.repository;
 
 import com.carmenio.consensus.domain.entity.Enrollment;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -27,4 +28,7 @@ interface JpaEnrollmentRepository extends JpaRepository<Enrollment, UUID> {
     boolean existsByElectoralProcessIdAndEmail(UUID electoralProcessId, String email);
 
     long countByElectoralProcessId(UUID electoralProcessId);
+
+    @Query("SELECT e.email FROM Enrollment e WHERE e.electoralProcessId = :processId AND e.email IN :emails")
+    List<String> findEmailsByElectoralProcessIdAndEmailIn(UUID processId, List<String> emails);
 }
