@@ -6,10 +6,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 /**
  * Global exception handler that catches exceptions and returns
@@ -55,6 +58,39 @@ public class ExceptionHandlerMiddleware {
         log.warn("Access denied: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(ApiResponse.error("Access denied: insufficient permissions"));
+    }
+
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<ApiResponse<?>> handleValidation(HandlerMethodValidationException ex) {
+        var message = ex.getAllErrors().stream()
+                .map(e -> e.getDefaultMessage())
+                .reduce((a, b) -> a + "; " + b)
+                .orElse("Validation error");
+        log.warn("Handler method validation error: {}", message);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(message));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiResponse<?>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        String parameterName = ex.getName();
+        String requiredType = ex.getRequiredType() != null
+                ? ex.getRequiredType().getSimpleName()
+                : "unknown";
+        String message = String.format(
+                "Invalid value for parameter '%s': expected type %s",
+                parameterName, requiredType);
+        log.warn("Type mismatch: parameter={} value={} expected={}",
+                parameterName, ex.getValue(), requiredType);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(message));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<?>> handleMessageNotReadable(HttpMessageNotReadableException ex) {
+        log.warn("Message not readable: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error("Invalid request body format"));
     }
 
     @ExceptionHandler(Exception.class)
