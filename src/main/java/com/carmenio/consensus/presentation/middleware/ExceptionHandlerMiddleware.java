@@ -12,6 +12,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 /**
  * Global exception handler that catches exceptions and returns
@@ -66,6 +67,21 @@ public class ExceptionHandlerMiddleware {
                 .reduce((a, b) -> a + "; " + b)
                 .orElse("Validation error");
         log.warn("Handler method validation error: {}", message);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(message));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiResponse<?>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        String parameterName = ex.getName();
+        String requiredType = ex.getRequiredType() != null
+                ? ex.getRequiredType().getSimpleName()
+                : "unknown";
+        String message = String.format(
+                "Invalid value for parameter '%s': expected type %s",
+                parameterName, requiredType);
+        log.warn("Type mismatch: parameter={} value={} expected={}",
+                parameterName, ex.getValue(), requiredType);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.error(message));
     }
