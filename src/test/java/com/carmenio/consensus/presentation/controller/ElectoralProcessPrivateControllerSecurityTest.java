@@ -4,6 +4,7 @@ import com.carmenio.consensus.application.dto.PaginatedResponse;
 import com.carmenio.consensus.application.dto.electoral_process.ElectoralProcessResponse;
 import com.carmenio.consensus.application.use_case.electoral_process.CreateElectoralProcessUseCase;
 import com.carmenio.consensus.application.use_case.electoral_process.DeleteElectoralProcessUseCase;
+import com.carmenio.consensus.application.use_case.electoral_process.FindElectoralProcessByIdUseCase;
 import com.carmenio.consensus.application.use_case.electoral_process.ListProcessesByCreatorUseCase;
 import com.carmenio.consensus.application.use_case.electoral_process.UpdateElectoralProcessUseCase;
 import com.carmenio.consensus.common.config.SecurityConfig;
@@ -50,6 +51,9 @@ class ElectoralProcessPrivateControllerSecurityTest {
     private DeleteElectoralProcessUseCase deleteUseCase;
 
     @MockitoBean
+    private FindElectoralProcessByIdUseCase findByIdUseCase;
+
+    @MockitoBean
     private ListProcessesByCreatorUseCase listUseCase;
 
     @Test
@@ -88,6 +92,34 @@ class ElectoralProcessPrivateControllerSecurityTest {
     @DisplayName("should return 403 when wrong role")
     void shouldReturn403WhenWrongRole() throws Exception {
         mockMvc.perform(get("/private/processes")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_consensus-user"))))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("should return process by ID for consensus-creator")
+    void shouldReturnProcessByIdForCreator() throws Exception {
+        var id = UUID.randomUUID();
+        var response = ElectoralProcessResponse.builder()
+                .id(id)
+                .name("Private Process")
+                .scope("private-scope")
+                .createdBy("user-1")
+                .build();
+
+        when(findByIdUseCase.execute(id)).thenReturn(response);
+
+        mockMvc.perform(get("/private/processes/{id}", id)
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_consensus-creator"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.name").value("Private Process"));
+    }
+
+    @Test
+    @DisplayName("should return 403 for GET /private/processes/{id} with wrong role")
+    void shouldReturn403ForGetByIdWithWrongRole() throws Exception {
+        mockMvc.perform(get("/private/processes/{id}", UUID.randomUUID())
                         .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_consensus-user"))))
                 .andExpect(status().isForbidden());
     }

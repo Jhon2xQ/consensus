@@ -5,6 +5,7 @@ import com.carmenio.consensus.application.dto.electoral_process.ElectoralProcess
 import com.carmenio.consensus.application.dto.electoral_process.UpdateElectoralProcessRequest;
 import com.carmenio.consensus.application.use_case.electoral_process.CreateElectoralProcessUseCase;
 import com.carmenio.consensus.application.use_case.electoral_process.DeleteElectoralProcessUseCase;
+import com.carmenio.consensus.application.use_case.electoral_process.FindElectoralProcessByIdUseCase;
 import com.carmenio.consensus.application.use_case.electoral_process.ListProcessesByCreatorUseCase;
 import com.carmenio.consensus.application.use_case.electoral_process.UpdateElectoralProcessUseCase;
 import org.junit.jupiter.api.DisplayName;
@@ -46,6 +47,9 @@ class ElectoralProcessPrivateControllerTest {
 
     @MockitoBean
     private DeleteElectoralProcessUseCase deleteUseCase;
+
+    @MockitoBean
+    private FindElectoralProcessByIdUseCase findByIdUseCase;
 
     @MockitoBean
     private ListProcessesByCreatorUseCase listUseCase;
@@ -113,6 +117,36 @@ class ElectoralProcessPrivateControllerTest {
         mockMvc.perform(delete("/private/processes/{id}", id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true));
+    }
+
+    @Test
+    @DisplayName("GET /private/processes/{id} should return process")
+    void shouldGetProcessById() throws Exception {
+        var id = UUID.randomUUID();
+        var response = ElectoralProcessResponse.builder()
+                .id(id)
+                .name("Private Process")
+                .scope("private-scope")
+                .build();
+
+        when(findByIdUseCase.execute(id)).thenReturn(response);
+
+        mockMvc.perform(get("/private/processes/{id}", id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.name").value("Private Process"));
+    }
+
+    @Test
+    @DisplayName("GET /private/processes/{id} should return 404 when not found")
+    void shouldReturn404WhenPrivateProcessNotFound() throws Exception {
+        var id = UUID.randomUUID();
+        when(findByIdUseCase.execute(id))
+                .thenThrow(com.carmenio.consensus.domain.exception.ElectoralProcessException.notFound(id));
+
+        mockMvc.perform(get("/private/processes/{id}", id))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.success").value(false));
     }
 
 }

@@ -77,6 +77,11 @@ public class TestSecurityController {
         return ResponseEntity.ok(ApiResponse.success("ok"));
     }
 
+    @GetMapping("/private/processes/{id}")
+    public ResponseEntity<ApiResponse<String>> getPrivateProcess(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.success("ok"));
+    }
+
     @PostMapping("/private/processes/{processId}/teams")
     public ResponseEntity<ApiResponse<String>> createTeam(@PathVariable UUID processId) {
         return ResponseEntity.ok(ApiResponse.success("ok"));

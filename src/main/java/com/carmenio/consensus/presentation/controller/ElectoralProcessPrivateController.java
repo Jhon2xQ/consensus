@@ -6,6 +6,7 @@ import com.carmenio.consensus.application.dto.electoral_process.ElectoralProcess
 import com.carmenio.consensus.application.dto.electoral_process.UpdateElectoralProcessRequest;
 import com.carmenio.consensus.application.use_case.electoral_process.CreateElectoralProcessUseCase;
 import com.carmenio.consensus.application.use_case.electoral_process.DeleteElectoralProcessUseCase;
+import com.carmenio.consensus.application.use_case.electoral_process.FindElectoralProcessByIdUseCase;
 import com.carmenio.consensus.application.use_case.electoral_process.ListProcessesByCreatorUseCase;
 import com.carmenio.consensus.application.use_case.electoral_process.UpdateElectoralProcessUseCase;
 import com.carmenio.consensus.presentation.middleware.ApiResponse;
@@ -34,6 +35,7 @@ public class ElectoralProcessPrivateController {
     private final CreateElectoralProcessUseCase createUseCase;
     private final UpdateElectoralProcessUseCase updateUseCase;
     private final DeleteElectoralProcessUseCase deleteUseCase;
+    private final FindElectoralProcessByIdUseCase findByIdUseCase;
     private final ListProcessesByCreatorUseCase listUseCase;
 
     /**
@@ -62,6 +64,19 @@ public class ElectoralProcessPrivateController {
             @AuthenticationPrincipal Jwt jwt,
             Pageable pageable) {
         var response = listUseCase.execute(jwt, pageable);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    /**
+     * Finds an electoral process by its ID.
+     * <p>
+     * Requires {@code consensus-creator} role. Returns the process with
+     * a fresh computed estatus, same as the public endpoint.
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<ElectoralProcessResponse>> findById(
+            @PathVariable UUID id) {
+        var response = findByIdUseCase.execute(id);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

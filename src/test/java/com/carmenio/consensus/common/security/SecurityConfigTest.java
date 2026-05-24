@@ -146,6 +146,29 @@ class SecurityConfigTest {
     }
 
     @Test
+    @DisplayName("GET /private/processes/{id} should return 401 without token")
+    void protectedGetProcessByIdWithoutToken() throws Exception {
+        mockMvc.perform(get("/private/processes/{id}", UUID.randomUUID()))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("GET /private/processes/{id} should return 403 with consensus-user role")
+    void protectedGetProcessByIdWithUserRole() throws Exception {
+        mockMvc.perform(get("/private/processes/{id}", UUID.randomUUID())
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_consensus-user"))))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("GET /private/processes/{id} should return 200 with consensus-creator role")
+    void protectedGetProcessByIdWithCreatorRole() throws Exception {
+        mockMvc.perform(get("/private/processes/{id}", UUID.randomUUID())
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_consensus-creator"))))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     @DisplayName("POST /private/processes/{processId}/teams should return 200 with consensus-creator role")
     void protectedPostTeamsWithCreatorRole() throws Exception {
         mockMvc.perform(post("/private/processes/{processId}/teams", UUID.randomUUID())
