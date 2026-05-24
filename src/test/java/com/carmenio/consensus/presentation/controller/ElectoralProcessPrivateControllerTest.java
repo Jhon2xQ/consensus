@@ -7,7 +7,6 @@ import com.carmenio.consensus.application.use_case.electoral_process.CreateElect
 import com.carmenio.consensus.application.use_case.electoral_process.DeleteElectoralProcessUseCase;
 import com.carmenio.consensus.application.use_case.electoral_process.ListProcessesByCreatorUseCase;
 import com.carmenio.consensus.application.use_case.electoral_process.UpdateElectoralProcessUseCase;
-import com.carmenio.consensus.domain.exception.ElectoralProcessException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,15 +115,4 @@ class ElectoralProcessPrivateControllerTest {
                 .andExpect(jsonPath("$.success").value(true));
     }
 
-    @Test
-    @DisplayName("DELETE /private/processes/{id} should return 409 when has dependencies")
-    void shouldReturn409WhenProcessHasDependencies() throws Exception {
-        var id = UUID.randomUUID();
-        doThrow(ElectoralProcessException.hasDependencies())
-                .when(deleteUseCase).execute(id);
-
-        mockMvc.perform(delete("/private/processes/{id}", id))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.success").value(false));
-    }
 }

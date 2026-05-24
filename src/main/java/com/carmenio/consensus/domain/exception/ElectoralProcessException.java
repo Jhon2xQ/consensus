@@ -30,7 +30,4 @@ public class ElectoralProcessException extends DomainException {
         return new ElectoralProcessException(reason, 400);
     }
 
-    public static ElectoralProcessException hasDependencies() {
-        return new ElectoralProcessException("Process has dependencies and cannot be deleted", 409);
-    }
 }
