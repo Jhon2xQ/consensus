@@ -29,6 +29,10 @@ interface JpaEnrollmentRepository extends JpaRepository<Enrollment, UUID> {
 
     long countByElectoralProcessId(UUID electoralProcessId);
 
+    long countByElectoralProcessIdAndCommitmentNotNull(UUID electoralProcessId);
+
+    long countByElectoralProcessIdAndHasVotedTrue(UUID electoralProcessId);
+
     @Query("SELECT e.email FROM Enrollment e WHERE e.electoralProcessId = :processId AND e.email IN :emails")
     List<String> findEmailsByElectoralProcessIdAndEmailIn(UUID processId, List<String> emails);
 }

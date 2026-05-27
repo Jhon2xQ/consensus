@@ -31,6 +31,10 @@ public interface EnrollmentRepository {
 
     long countByElectoralProcessId(UUID electoralProcessId);
 
+    long countByElectoralProcessIdAndCommitmentNotNull(UUID electoralProcessId);
+
+    long countByElectoralProcessIdAndHasVotedTrue(UUID electoralProcessId);
+
     List<Enrollment> saveAll(List<Enrollment> enrollments);
 
     List<String> findEmailsByProcessIdAndEmailsIn(UUID processId, List<String> emails);

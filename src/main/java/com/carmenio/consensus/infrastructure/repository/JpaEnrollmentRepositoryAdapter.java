@@ -70,6 +70,16 @@ public class JpaEnrollmentRepositoryAdapter implements EnrollmentRepository {
     }
 
     @Override
+    public long countByElectoralProcessIdAndCommitmentNotNull(UUID electoralProcessId) {
+        return jpaRepository.countByElectoralProcessIdAndCommitmentNotNull(electoralProcessId);
+    }
+
+    @Override
+    public long countByElectoralProcessIdAndHasVotedTrue(UUID electoralProcessId) {
+        return jpaRepository.countByElectoralProcessIdAndHasVotedTrue(electoralProcessId);
+    }
+
+    @Override
     public List<Enrollment> saveAll(List<Enrollment> enrollments) {
         return jpaRepository.saveAll(enrollments);
     }
