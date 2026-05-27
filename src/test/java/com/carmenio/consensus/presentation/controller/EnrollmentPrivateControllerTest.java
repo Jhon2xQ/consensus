@@ -32,10 +32,10 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(EnrollmentController.class)
+@WebMvcTest(EnrollmentPrivateController.class)
 @ActiveProfiles("test")
 @AutoConfigureMockMvc(addFilters = false)
-class EnrollmentControllerTest {
+class EnrollmentPrivateControllerTest {
 
     @Autowired
     private MockMvc mockMvc;

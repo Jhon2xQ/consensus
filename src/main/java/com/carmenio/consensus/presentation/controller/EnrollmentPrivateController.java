@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * REST controller for enrollment management within electoral processes.
+ * REST controller for private enrollment management within electoral processes.
  * <p>
  * Two-phase enrollment flow:
  * <ol>
@@ -36,7 +36,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/private")
 @RequiredArgsConstructor
-public class EnrollmentController {
+public class EnrollmentPrivateController {
 
     private final CreateEnrollmentsBatchUseCase createEnrollmentsBatchUseCase;
     private final ClaimEnrollmentUseCase claimEnrollmentUseCase;
