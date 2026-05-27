@@ -1,10 +1,17 @@
 # Enrollment API
 
-Base path: `/api/private`
+## Base paths
+
+| Grupo | Base path |
+|-------|-----------|
+| Privado | `/api/private` |
+| Público | `/api/public` |
 
 ---
 
 ## Índice Rápido
+
+### Privado
 
 | Método | Endpoint | Auth | Rol |
 |--------|----------|------|-----|
@@ -14,6 +21,12 @@ Base path: `/api/private`
 | PUT | `/api/private/enrollments/{id}/commitment` | ✅ Bearer JWT | `consensus-user` |
 | DELETE | `/api/private/enrollments/{id}` | ✅ Bearer JWT | `consensus-creator` |
 
+### Público
+
+| Método | Endpoint | Auth |
+|--------|----------|------|
+| GET | `/api/public/processes/{processId}/enrollments` | ❌ Sin auth |
+
 Detalle completo debajo.
 
 - [GET /api/private/processes/{processId}/enrollments — Listar inscripciones](#get-apiprivateprocessesprocessidenrollments-listar)
@@ -21,6 +34,7 @@ Detalle completo debajo.
 - [POST /api/private/processes/{processId}/enrollments — Crear inscripción (Fase 1)](#post-apiprivateprocessesprocessidenrollments-crear)
 - [PUT /api/private/enrollments/{id}/commitment — Reclamar inscripción (Fase 2)](#put-apiprivateenrollmentsidcommitment-reclamar)
 - [DELETE /api/private/enrollments/{id} — Eliminar inscripción](#delete-apiprivateenrollmentsid-eliminar)
+- [GET /api/public/processes/{processId}/enrollments — Estadísticas públicas](#get-apipublicprocessesprocessidenrollments-estadísticas)
 
 ---
 
@@ -386,6 +400,54 @@ Elimina una inscripción por su ID.
 {
   "success": false,
   "message": "Enrollment not found",
+  "data": null,
+  "timestamp": 1234567890
+}
+```
+
+---
+
+## GET /api/public/processes/{processId}/enrollments <a name="get-apipublicprocessesprocessidenrollments-estadísticas"></a>
+
+Devuelve estadísticas agregadas de inscripciones de un proceso electoral. No expone datos individuales de votantes.
+
+> **Auth**: ❌ Sin autenticación — acceso público
+
+### Parámetros (Path)
+
+| Nombre | Tipo | Requerido |
+|--------|------|-----------|
+| `processId` | UUID | Sí |
+
+### Respuesta `200 OK`
+
+```
+{
+  "success": true,
+  "message": "Operation successful",
+  "data": {
+    "totalParticipants": integer,
+    "totalCommitments": integer,
+    "totalVoted": integer
+  },
+  "timestamp": 1234567890
+}
+```
+
+### Campos del response
+
+| Campo | Descripción |
+|-------|-------------|
+| `totalParticipants` | Total de inscripciones registradas en el proceso |
+| `totalCommitments` | Inscripciones que ya enviaron su commitment de Semaphore |
+| `totalVoted` | Inscripciones que emitieron su voto |
+
+### Respuesta `404 Not Found`
+
+```
+{
+  "success": false,
+  "message": "Electoral process not found",
   "data": null,
   "timestamp": 1234567890
 }
